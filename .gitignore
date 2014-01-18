@@ -1,2 +1,4 @@
 .idea/
-vendors/
+/vendor
+/bootstrap/compiled.php
+composer.phar
