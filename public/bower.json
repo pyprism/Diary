@@ -1,0 +1,24 @@
+{
+  "name": "Diary",
+  "version": "0.0.2",
+  "homepage": "https://github.com/pyprism/Diary",
+  "authors": [
+    "pyprism <git.pyprism@gmail.com>"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "tinymce-release": "~4.0.16",
+    "bootstrap": "~3.1.1"
+  }
+}
