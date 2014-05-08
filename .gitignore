@@ -6,4 +6,3 @@ composer.phar
 .env.php
 .DS_Store
 Thumbs.db
-public/bower_components/

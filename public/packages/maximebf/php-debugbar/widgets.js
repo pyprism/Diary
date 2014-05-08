@@ -48,7 +48,11 @@ if (typeof(PhpDebugBar) == 'undefined') {
      */
     var highlight = PhpDebugBar.Widgets.highlight = function(code, lang) {
         if (typeof(code) === 'string') {
+<<<<<<< HEAD
             if (!hljs) {
+=======
+            if (typeof(hljs) === 'undefined') {
+>>>>>>> 9982ef788ffcbb67a9d2fc4f7a7a4dd739263440
                 return htmlize(code);
             }
             if (lang) {
@@ -57,7 +61,11 @@ if (typeof(PhpDebugBar) == 'undefined') {
             return hljs.highlightAuto(code).value;
         }
 
+<<<<<<< HEAD
         if (hljs) {
+=======
+        if (typeof(hljs) === 'object') {
+>>>>>>> 9982ef788ffcbb67a9d2fc4f7a7a4dd739263440
             code.each(function(i, e) { hljs.highlightBlock(e); });
         }
         return code;
@@ -194,7 +202,11 @@ if (typeof(PhpDebugBar) == 'undefined') {
         className: csscls('kvlist varlist'),
 
         itemRenderer: function(dt, dd, key, value) {
+<<<<<<< HEAD
             dt.text(key);
+=======
+            $('<span />').attr('title', key).text(key).appendTo(dt);
+>>>>>>> 9982ef788ffcbb67a9d2fc4f7a7a4dd739263440
 
             var v = value;
             if (v && v.length > 100) {

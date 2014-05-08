@@ -13,5 +13,15 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+	return View::make('master');
+});
+
+Route::get('new-post', function(){
+    return View::make('new-post');
+});
+
+Route::post('new-post',function(){
+    //return Input::all();
+    return Input::get('content');
+    //return Redirect::to('/');
 });
