@@ -1,3 +1,4 @@
 .idea/
 vendor/
 bower_components/
+app/config/database.php
