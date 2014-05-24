@@ -1,8 +1,0 @@
-.idea
-/bootstrap/compiled.php
-/vendor
-composer.phar
-.env.local.php
-.env.php
-.DS_Store
-Thumbs.db
