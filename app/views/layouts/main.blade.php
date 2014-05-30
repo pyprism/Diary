@@ -6,8 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ HTML::style('bower/bootstrap/dist/css/bootstrap.css') }}
     {{ HTML::style('main.css') }}
-    {{ HTML::style('bower/jquery/dist/jquery.js') }}
-    {{ HTML::style('bower/bootstrap/dist/js/bootstrap.js') }}
 </head>
 <body>
 <div class="navbar navbar-fixed-top">
@@ -30,5 +28,11 @@
     @endif
 </div>
 {{ $content }}
+
+
+{{ HTML::script('bower/jquery/dist/jquery.js') }}
+{{ HTML::script('bower/bootstrap/dist/js/bootstrap.js') }}
+{{ HTML::script('bower/ckeditor/ckeditor.js') }}
+{{ HTML::script('editor.js') }}
 </body>
 </html>
