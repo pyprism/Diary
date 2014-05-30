@@ -11,7 +11,7 @@ class UsersController extends BaseController {
 
     public function __construct() {
         $this->beforeFilter('csrf', array('on'=>'post'));
-        $this->beforeFilter('auth', array('only'=>array('getDashboard')));
+        $this->beforeFilter('auth', array('only'=>array('getDashboard' , 'getEditr')));
     }
 
     public function getRegister(){
@@ -59,5 +59,21 @@ class UsersController extends BaseController {
     public function getLogout() {
         Auth::logout();
         return Redirect::to('users/login')->with('message', 'Your are now logged out!');
+    }
+
+    public function getEditor(){
+        $this->layout->content = View::make('content.editor');
+    }
+
+    public function postEditor(){
+        if (Input::has('title') && Input::has('editor1'))
+        {
+            $content = new Content;
+            $content->title = Input::get('title');
+            $content->text = Input::get('editor1');
+            $content->save();
+        }else{
+            return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
+        }
     }
 }
