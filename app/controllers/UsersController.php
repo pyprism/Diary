@@ -15,6 +15,9 @@ class UsersController extends BaseController {
     }
 
     public function getRegister(){
+        if (Auth::check()){
+            return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
+        }else
         $this->layout->content = View::Make('users.register');
     }
 
@@ -39,6 +42,10 @@ class UsersController extends BaseController {
     }
 
     public function getLogin() {
+        if (Auth::check())
+        {
+            return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
+        }else
         $this->layout->content = View::make('users.login');
     }
 
