@@ -60,9 +60,10 @@ class UsersController extends BaseController {
     }
 
     public function getDashboard() {
-        $contents = DB::table('content')->first();
+       $contents = DB::table('content')->first();
        $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
         //print_r($contents);
+       //return Content::All();
     }
 
     public function getLogout() {
@@ -81,6 +82,8 @@ class UsersController extends BaseController {
             $content->title = Input::get('title');
             $content->text = Input::get('editor1');
             $content->save();
+            return Redirect::to('users/dashboard')->with('message','Post Saved');
+
         }else{
             return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
         }

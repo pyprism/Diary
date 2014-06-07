@@ -19,16 +19,20 @@
             @else
             <li>{{ HTML::link('users/logout', 'Logout') }}</li>
             <li>{{ HTML::link('users/dashboard', 'Dashboard') }}</li>
+            <li>{{ HTML::link('users/editor', 'Create New Post') }}</li>
             @endif
         </ul>
     </div>
 </nav>
 <div class="container">
     @if(Session::has('message'))
-    <p class="alert">{{ Session::get('message') }}</p>
+    <p class="alert alert-info">{{ Session::get('message') }}</p>
     @endif
 </div>
-{{ $content }}
+<div class="container" >
+    {{ $content }}
+</div>
+
 
 
 {{ HTML::script('bower/jquery/dist/jquery.js') }}

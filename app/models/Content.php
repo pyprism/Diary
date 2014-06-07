@@ -10,6 +10,6 @@ class Content extends Eloquent {
     protected $table = 'content';
 
     public function User(){
-        $this->belongsTo('User');
+        return $this->belongsTo('User');
     }
 }

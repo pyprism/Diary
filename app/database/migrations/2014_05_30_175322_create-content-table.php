@@ -13,6 +13,7 @@ class CreateContentTable extends Migration {
 	public function up()
 	{
 		Schema::create('content', function($table){
+            $table->increments('id');
             $table->String('Title');
             $table->longText('text');
             $table->timestamps();
