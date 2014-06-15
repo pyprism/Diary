@@ -9,6 +9,8 @@
 class Content extends Eloquent {
     protected $table = 'content';
 
+    protected $fillable;
+
     public function User(){
         return $this->belongsTo('User');
     }
