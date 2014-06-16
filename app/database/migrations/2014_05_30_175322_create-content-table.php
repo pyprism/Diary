@@ -27,7 +27,7 @@ class CreateContentTable extends Migration {
 	 */
 	public function down()
 	{
-		Screma::drop('content');
+		Schema::drop('content');
 	}
 
 }
