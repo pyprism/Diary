@@ -18,7 +18,7 @@ class UsersController extends BaseController {
         if (Auth::check()){
             return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
         }else
-        $this->layout->content = View::Make('users.register');
+            $this->layout->content = View::Make('users.register');
     }
 
     public function postCreate() {
@@ -46,7 +46,7 @@ class UsersController extends BaseController {
         {
             return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
         }else
-        $this->layout->content = View::make('users.login');
+            $this->layout->content = View::make('users.login');
     }
 
     public function postSignin() {
@@ -60,10 +60,14 @@ class UsersController extends BaseController {
     }
 
     public function getDashboard() {
-       $contents = DB::table('content')->first();
-       $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
-        //print_r($contents);
-       //return Content::All();
+        if (!Auth::check()){
+            return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
+        }else{
+            $contents = DB::table('content')->first();
+            $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
+            //print_r($contents);
+            //return Content::All();
+        }
     }
 
     public function getLogout() {
@@ -72,20 +76,26 @@ class UsersController extends BaseController {
     }
 
     public function getEditor(){
-        $this->layout->content = View::make('content.editor');
+        if (!Auth::check()){
+            return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
+        }else
+            $this->layout->content = View::make('content.editor');
     }
 
     public function postEditor(){
-        if (Input::has('title') && Input::has('editor1'))
-        {
-            $content = new Content;
-            $content->title = Input::get('title');
-            $content->text = Input::get('editor1');
-            $content->save();
-            return Redirect::to('users/dashboard')->with('message','Post Saved');
+        if (Auth::check()){
+            if (Input::has('title') && Input::has('editor1'))
+            {
+                $content = new Content;
+                $content->title = Input::get('title');
+                $content->text = Input::get('editor1');
+                $content->author_id => Auth::user()->id;
+                $content->save();
+                return Redirect::to('users/dashboard')->with('message','Post Saved');
 
-        }else{
-            return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
+            }else{
+                return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
+            }
         }
     }
 }
