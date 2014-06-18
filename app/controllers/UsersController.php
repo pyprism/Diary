@@ -63,7 +63,7 @@ class UsersController extends BaseController {
         if (!Auth::check()){
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else{
-            $contents = DB::table('content')->first();
+            $contents = DB::table('content')->where('author_id', Auth::User()->id )->first();
             $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
             //print_r($contents);
             //return Content::All();
@@ -89,7 +89,7 @@ class UsersController extends BaseController {
                 $content = new Content;
                 $content->title = Input::get('title');
                 $content->text = Input::get('editor1');
-                $content->author_id => Auth::user()->id;
+                $content->author_id = Auth::user()->id;
                 $content->save();
                 return Redirect::to('users/dashboard')->with('message','Post Saved');
 
