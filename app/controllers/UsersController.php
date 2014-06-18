@@ -11,7 +11,7 @@ class UsersController extends BaseController {
 
     public function __construct() {
         $this->beforeFilter('csrf', array('on'=>'post'));
-        $this->beforeFilter('auth', array('only'=>array('getDashboard' , 'getEditr')));
+        //$this->beforeFilter('auth', array('only'=>array('getDashboard' , 'getEditr')));
     }
 
     public function getRegister(){
