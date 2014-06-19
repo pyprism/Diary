@@ -6,3 +6,14 @@ body {
     width: 400px;
     margin: 0 auto;
 }
+
+
+.center {
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -150px;
+    margin-top: -100px;
+}
