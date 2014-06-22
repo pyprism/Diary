@@ -1,5 +1,5 @@
-
-{{ Form::open(array('url'=>'users/create', 'class'=>'form-horizontal')) }}
+<div class="center">
+{{ Form::open(array('url'=>'users/create', 'class'=>'clearfix')) }}
 <h2 class="form-signup-heading">Please Register</h2>
 
 <ul>
@@ -8,20 +8,21 @@
     @endforeach
 </ul>
 <div class="form-group">
-{{ Form::text('firstname', null, array('class'=>'input-block-level', 'placeholder'=>'First Name')) }}
+{{ Form::text('firstname', null, array('class'=>'form-control', 'placeholder'=>'First Name')) }}
 </div>
 <div class="form-group">
-{{ Form::text('lastname', null, array('class'=>'input-block-level', 'placeholder'=>'Last Name')) }}
+{{ Form::text('lastname', null, array('class'=>'form-control', 'placeholder'=>'Last Name')) }}
 </div>
 <div class="form-group">
-{{ Form::text('email', null, array('class'=>'input-block-level', 'placeholder'=>'Email Address')) }}
+{{ Form::text('email', null, array('class'=>'form-control', 'placeholder'=>'Email Address')) }}
 </div>
 <div class="form-group">
-{{ Form::password('password', array('class'=>'input-block-level', 'placeholder'=>'Password')) }}
+{{ Form::password('password', array('class'=>'form-control', 'placeholder'=>'Password')) }}
 </div>
 <div class="form-group">
-{{ Form::password('password_confirmation', array('class'=>'input-block-level', 'placeholder'=>'Confirm Password')) }}
+{{ Form::password('password_confirmation', array('class'=>'form-control', 'placeholder'=>'Confirm Password')) }}
 </div>
 
 {{ Form::submit('Register', array('class'=>'btn btn-default'))}}
 {{ Form::close() }}
+</div>
