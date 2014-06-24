@@ -17,3 +17,11 @@ body {
     margin-left: -150px;
     margin-top: -100px;
 }
+
+html {
+    background: url(xindex.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}

@@ -1,3 +1,5 @@
+@extends('layouts.main')
+@section('content')
 <div class="container">
     <div class="center">
         {{ Form::open(array('url'=>'users/signin', 'class'=>'clearfix')) }}
@@ -12,3 +14,4 @@
         {{ Form::close() }}
     </div>
 </div>
+@stop

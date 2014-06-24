@@ -7,7 +7,7 @@
  */
 
 class UsersController extends BaseController {
-    protected $layout = "layouts.main";
+    //protected $layout = "layouts.main";
 
     public function __construct() {
         $this->beforeFilter('csrf', array('on'=>'post'));
@@ -18,7 +18,8 @@ class UsersController extends BaseController {
         if (Auth::check()){
             return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
         }else
-            $this->layout->content = View::Make('users.register');
+           // $this->layout->content = View::Make('users.register');
+        return View::Make('users.register');
     }
 
     public function postCreate() {
@@ -46,7 +47,8 @@ class UsersController extends BaseController {
         {
             return Redirect::to('users/dashboard')->with('message', 'You are already logged in !');
         }else
-            $this->layout->content = View::make('users.login');
+            //$this->layout->content = View::make('users.login');
+            return View::make('users.login');
     }
 
     public function postSignin() {
@@ -64,22 +66,21 @@ class UsersController extends BaseController {
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else{
             $contents = DB::table('content')->where('author_id', Auth::User()->id )->first();
-            $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
+           // $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
+            return View::make('users.dashboard')-> with('content' , $contents);
             //print_r($contents);
             //return Content::All();
         }
     }
 
-    public function getLogout() {
-        Auth::logout();
-        return Redirect::to('users/login')->with('message', 'Your are now logged out!');
-    }
+
 
     public function getEditor(){
         if (!Auth::check()){
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else
-            $this->layout->content = View::make('content.editor');
+            //$this->layout->content = View::make('content.editor');
+            return View::make('content.editor');
     }
 
     public function postEditor(){
@@ -97,5 +98,10 @@ class UsersController extends BaseController {
                 return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
             }
         }
+    }
+
+    public function getLogout() {
+        Auth::logout();
+        return Redirect::to('users/login')->with('message', 'Your are now logged out!');
     }
 }

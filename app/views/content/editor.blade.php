@@ -1,4 +1,5 @@
-
+@extends('layouts.main')
+@section('content')
 {{ Form::open(array('url' => 'users/editor')) }}
 {{ Form::text('title', 'Enter a title for your post') }}
 {{ Form::textarea('editor1', null, array(
@@ -12,3 +13,5 @@
     <p class="alert">{{ Session::get('message') }}</p>
     @endif
 </div>
+
+@stop

@@ -5,6 +5,7 @@
 	<title>Welcome</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ HTML::style('bower/bootstrap/dist/css/bootstrap.css') }}
+    {{ HTML::style('main.css') }}
 	<style>
 		@import url(//fonts.googleapis.com/css?family=Lato:700);
 
