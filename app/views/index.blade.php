@@ -4,7 +4,8 @@
 	<meta charset="UTF-8">
 	<title>Welcome</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{ HTML::style('bower/bootstrap/dist/css/bootstrap.css') }}
+    {{ HTML::style('bower/bootstrap/dist/css/bootstrap.min.css') }}
+    {{ HTML::style('bower/Font-Awesome/css/font-awesome.min.css') }}
     {{ HTML::style('main.css') }}
 	<style>
 		@import url(//fonts.googleapis.com/css?family=Lato:700);
@@ -38,14 +39,13 @@
 </head>
 <body>
 	<div class="welcome">
-        <button type="button" class="btn btn-default btn-l">
-            <span class="glyphicon glyphicon-user"> {{ HTML::link('users/login', 'Login') }}</span>
-        </button>
-        OR
-        <button type="button" class="btn btn-default btn-l">
-            <span class="glyphicon glyphicon-registration-mark"> {{ HTML::link('users/register', 'Register') }}</span>
+            <a href="{{ $login }}" class="btn btn-default btn-lg">
+                <i class="fa fa-sign-in fa-lg"></i> Login
             </a>
-        </button>
+
+            <a href="{{ $register }}" class="btn btn-default btn-lg">
+                <i class="fa fa-heart fa-lg"></i> Register
+            </a>
 		<h1>Hiren Blog</h1>
 	</div>
 </body>
