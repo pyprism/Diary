@@ -13,7 +13,10 @@
 
 Route::get('/', function()
 {
-	return View::make('hello');
+    $register = action('UsersController@getRegister');
+    $login = action('UsersController@getLogin');
+    $data = array( 'register'=>$register, 'login'=>$login);
+	return View::make('index', $data);
 });
 
 Route::controller('users', 'UsersController');
