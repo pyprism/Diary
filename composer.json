@@ -4,7 +4,8 @@
 	"keywords": ["framework", "laravel"],
 	"license": "MIT",
 	"require": {
-		"laravel/framework": "4.2.*"
+		"laravel/framework": "4.2.*",
+		"barryvdh/laravel-debugbar": "1.x"
 	},
 	"autoload": {
 		"classmap": [
@@ -23,6 +24,7 @@
 		],
 		"post-update-cmd": [
 			"php artisan clear-compiled",
+            "php artisan debugbar:publish",
 			"php artisan optimize"
 		],
 		"post-create-project-cmd": [

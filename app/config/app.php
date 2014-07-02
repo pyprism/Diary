@@ -118,6 +118,7 @@ return array(
 		'Illuminate\Translation\TranslationServiceProvider',
 		'Illuminate\Validation\ValidationServiceProvider',
 		'Illuminate\View\ViewServiceProvider',
+        'Barryvdh\Debugbar\ServiceProvider',
 		'Illuminate\Workbench\WorkbenchServiceProvider',
 
 	),
