@@ -35,6 +35,7 @@
 <div class="container">
 
     <div class="raptor-editable" data-id="main-content">
+        <input type='hidden' id='csrf'  value='{{ $csrf }}' />
         <p>
             Raptor may be integrated into a site many ways.
             This article aims to cover the simplest integration possible.
