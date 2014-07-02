@@ -10,12 +10,15 @@ $(function() {
             },
             // Provide options for the saveJson plugin
             saveJson: {
+                token: function () {
+                    return this.raptor.getElement().data('csrf');
+                },
                 // The URL to which Raptor data will be POSTed
                 url: 'http://localhost:8000/users/editor',
                 // The parameter name for the posted data
                 postName: 'raptor-content',
                 // A string or function that returns the identifier for the Raptor instance being saved
-                id: function() {
+                id: function () {
                     return this.raptor.getElement().data('id');
                 }
             }

@@ -65,10 +65,10 @@ class UsersController extends BaseController {
         if (!Auth::check()){
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else{
-            $contents = DB::table('content')->where('author_id', Auth::User()->id )->first();
+            $contents = DB::table('content')->where('author_id', Auth::User()->id )->get();
            // $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
-            return View::make('users.dashboard')-> with('content' , $contents);
-            //print_r($contents);
+           //return View::make('users.dashboard')->with('content', $contents);
+            dd($contents);
             //return Content::All();
         }
     }
@@ -80,11 +80,11 @@ class UsersController extends BaseController {
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else
             //$this->layout->content = View::make('content.editor');
-            return View::make('content.editor');
+            return View::make('content.editor')->with('csrf', Form::token());
     }
 
     public function postEditor(){
-        if (Auth::check()){
+        /*if (Auth::check()){
             if (Input::has('title') && Input::has('editor1'))
             {
                 $content = new Content;
@@ -97,7 +97,11 @@ class UsersController extends BaseController {
             }else{
                 return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
             }
+        }*/
+        if(Input::has('raptor-content')){
+            return "success";
         }
+        return Input::all();
     }
 
     public function getLogout() {
