@@ -64,13 +64,13 @@ class UsersController extends BaseController {
     public function getDashboard() {
         if (!Auth::check()){
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
-        }else{
-            $contents = DB::table('content')->where('author_id', Auth::User()->id )->get();
-           // $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
-           //return View::make('users.dashboard')->with('content', $contents);
-            dd($contents);
-            //return Content::All();
         }
+            $contents = DB::table('content')->where('author_id', Auth::User()->id )->lists('title', 'text');
+           // $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
+           return View::make('users.dashboard')->with('content', $contents);
+          //  dd($contents);
+            //return Content::All();
+
     }
 
 
@@ -80,28 +80,25 @@ class UsersController extends BaseController {
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }else
             //$this->layout->content = View::make('content.editor');
-            return View::make('content.editor')->with('csrf', Form::token());
+            return View::make('content.editor');
     }
 
     public function postEditor(){
-        /*if (Auth::check()){
-            if (Input::has('title') && Input::has('editor1'))
+        if (Auth::check()){
+            if (Input::has('title') && Input::has('content'))
             {
                 $content = new Content;
                 $content->title = Input::get('title');
-                $content->text = Input::get('editor1');
+                $content->text = Input::get('content');
                 $content->author_id = Auth::user()->id;
                 $content->save();
-                return Redirect::to('users/dashboard')->with('message','Post Saved');
+                //return Redirect::to('users/dashboard')->with('message','Post Saved');
 
             }else{
-                return Redirect::to('users/editor')->with('message','Maybe Title or Content is missing ! ');
+                return Redirect::to('users/editor')->with('message','Maybe the Title or Contents is missing ! ');
             }
-        }*/
-        if(Input::has('raptor-content')){
-            return "success";
         }
-        return Input::all();
+        //return Input::all();
     }
 
     public function getLogout() {

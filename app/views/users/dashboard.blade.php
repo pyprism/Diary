@@ -17,7 +17,7 @@
     </tr>
     </thead>
     @foreach ($content as $user)
-    <p>{{ $user }}</p>
+        <p>{{ $user }}</p>
         <tbody>
             <tr>
                 <th></th>
