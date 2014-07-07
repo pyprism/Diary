@@ -27,33 +27,28 @@
             </ul>
         </div>
     </header>
-</div>
 
     @if(Session::has('message'))
     <p class="alert alert-info">{{ Session::get('message') }}</p>
     @endif
+
+</div>
+
+
 <div class="container">
-
-    <div class="raptor-editable" data-id="main-content">
-        <input type='hidden' id='csrf'  value='{{ $csrf }}' />
-        <p>
-            Raptor may be integrated into a site many ways.
-            This article aims to cover the simplest integration possible.
-            asdasdasd
-            asd asd ad asd
-             ads asd
-
-        </p>
-    </div>
+    {{ Form::open() }}
+    Title
+    {{ Form::text('title') }}
+    {{ Form::textarea('content') }}
+    {{ Form::submit('Save', array('class' => 'btn')) }}
+    {{ Form::close() }}
 </div>
 
 
 
 {{ HTML::script('bower/jquery/dist/jquery.min.js') }}
 {{ HTML::script('bower/bootstrap/dist/js/bootstrap.min.js') }}
-{{ HTML::script('raptor/example/libraries/jquery-ui.js') }}
-{{ HTML::script('raptor/raptor.min.js') }}
-{{ HTML::style('raptor/raptor-front-end.min.css') }}
+{{ HTML::script('bower/tinymce/tinymce.min.js') }}
 {{ HTML::script('editor.js') }}
 </body>
 </html>
