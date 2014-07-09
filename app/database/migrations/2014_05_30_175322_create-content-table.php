@@ -16,6 +16,7 @@ class CreateContentTable extends Migration {
             $table->increments('id');
             $table->String('title');
             $table->longText('text');
+            $table->String('tag');
             $table->integer('author_id');
             $table->timestamps();
         });
