@@ -17,6 +17,9 @@
         {{ Form::text('lastname', null, array('class'=>'form-control', 'placeholder'=>'Last Name')) }}
     </div>
     <div class="form-group">
+        {{ Form::text('username', null, array('class'=>'form-control', 'placeholder'=>'Username')) }}
+    </div>
+    <div class="form-group">
         {{ Form::text('email', null, array('class'=>'form-control', 'placeholder'=>'Email Address')) }}
     </div>
     <div class="form-group">
