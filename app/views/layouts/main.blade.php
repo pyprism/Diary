@@ -23,6 +23,7 @@
             <li><a href="{{ url('users/editor') }}" class="fa fa-book"> Create New Post</a></li>
             <li ><a href="https://github.com/pyprism/Diary" class="fa fa-github"> Source Code</a></li>
             <li><a href="{{ url('users/logout') }}" class="fa fa-sign-out"> Logout</a></li>
+            <li><a href="{{ url('users/logout') }}" class="fa fa-user navbar-right"> Hi, {{ username }}!</a></li>
             @endif
         </ul>
     </div>
