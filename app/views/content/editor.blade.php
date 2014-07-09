@@ -38,7 +38,7 @@
 <div class="container">
     {{ Form::open() }}
     Title
-    {{ Form::text('title') }}
+    {{ Form::text('title') }} Tag {{ Form::text('tag') }}
     {{ Form::textarea('content') }}
     {{ Form::submit('Save', array('class' => 'btn')) }}
     {{ Form::close() }}
