@@ -11,7 +11,7 @@ class UsersController extends BaseController {
 
     public function __construct() {
         $this->beforeFilter('csrf', array('on'=>'post'));
-        //$this->beforeFilter('auth', array('only'=>array('getDashboard' , 'getEditr')));
+        $this->beforeFilter('auth', array('only'=>array('getPost')));
     }
 
     public function getRegister(){
@@ -31,6 +31,7 @@ class UsersController extends BaseController {
             $user = new User;
             $user->firstname = Input::get('firstname');
             $user->lastname = Input::get('lastname');
+            $user->username = Input::get('username');
             $user->email = Input::get('email');
             $user->password = Hash::make(Input::get('password'));
             $user->save();
@@ -65,10 +66,12 @@ class UsersController extends BaseController {
         if (!Auth::check()){
             return Redirect::to('users/login')->with('message', 'You motherf@)ker are not logged in !');
         }
-            $contents = DB::table('content')->where('author_id', Auth::User()->id )->lists('title', 'text');
+
+            $contents = DB::table('content')->where('author_id', Auth::User()->id )->get();
+           // $contents = DB::table('content')->where('author_id', Auth::User()->id )->lists('title', 'text');
            // $this->layout->content = View::make('users.dashboard')-> with('content' , $contents);
-           return View::make('users.dashboard')->with('content', $contents);
-          //  dd($contents);
+            return View::make('users.dashboard')->with('contents', $contents);
+           //dd($contents);
             //return Content::All();
 
     }
@@ -104,5 +107,19 @@ class UsersController extends BaseController {
     public function getLogout() {
         Auth::logout();
         return Redirect::to('users/login')->with('message', 'Your are now logged out!');
+    }
+
+    public function getPost($id){
+        $post = DB::table('content')->where('author_id', Auth::User()->id)
+                                        ->where('id', $id )->lists('text');
+        return View::make('content.post',array('post'=> $post, 'id' => $id));
+        //dd($post);
+
+    }
+
+    public function getUpdate($id){
+        $post = DB::table('content')->where('author_id', Auth::User()->id)
+            ->where('id', $id )->get();
+        return View::make('content.update')->with('post', $post);
     }
 }
