@@ -1,32 +1,37 @@
 
 @extends('layouts.main')
-  @section('content')
-    <h1>Dashboard</h1>
+@section('content')
+<h1>Dashboard</h1>
 
-    <p>Welcome to your Dashboard. You rock bitch :D !</p>
-    @if(!$content)
-    <p class="alert alert-info" > Ops you don't have any post !</p>
-    @else
-    <table class="table table-bordered">
+<p>Welcome to your Dashboard. You rock bitch :D !</p>
+@if(!$contents)
+<p class="alert alert-info" > Ops you don't have any post !</p>
+@else
+<table class="table table-bordered">
     <thead>
     <tr>
         <th>Title</th>
-        <th>Date</th>
+        <th>Created At</th>
+        <th>Updated At</th>
         <th>Tag</th>
-        <th>Option</th>
     </tr>
     </thead>
-    @foreach ($content as $user)
-        <p>{{ $user }}</p>
-        <tbody>
-            <tr>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </tbody>
-    </table>
+
+    <tbody>
+    @foreach ($contents as $content)
+    <tr>
+        <th><a href='{{ url("users/post") . '/' . $content->id }}'>{{ $content->title }}</a></th>
+        <th>{{ $content->created_at }}</th>
+        <th>{{ $content->updated_at }}</th>
+        @if($content->tag)
+        <th>{{ $content->tag }}</th>
+        @endif
+        <th>None</th>
+    </tr>
     @endforeach
-    @endif
+    </tbody>
+</table>
+
+@endif
 
 @stop
