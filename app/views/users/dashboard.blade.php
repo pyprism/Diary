@@ -7,7 +7,7 @@
 @if(!$contents)
 <p class="alert alert-info" > Ops you don't have any post !</p>
 @else
-<table class="table table-bordered">
+<table class="table table-bordered table-hover">
     <thead>
     <tr>
         <th>Title</th>
@@ -23,10 +23,11 @@
         <th><a href='{{ url("users/post") . '/' . $content->id }}'>{{ $content->title }}</a></th>
         <th>{{ $content->created_at }}</th>
         <th>{{ $content->updated_at }}</th>
-        @if($content->tag)
+        @if(!$content->tag)
+        <th>None</th>
+        @else
         <th>{{ $content->tag }}</th>
         @endif
-        <th>None</th>
     </tr>
     @endforeach
     </tbody>
