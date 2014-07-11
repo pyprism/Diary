@@ -93,9 +93,10 @@ class UsersController extends BaseController {
                 $content = new Content;
                 $content->title = Input::get('title');
                 $content->text = Input::get('content');
+                $content->tag = Input::get('tag');
                 $content->author_id = Auth::user()->id;
                 $content->save();
-                //return Redirect::to('users/dashboard')->with('message','Post Saved');
+                return Redirect::to('users/dashboard')->with('message','Post Saved');
 
             }else{
                 return Redirect::to('users/editor')->with('message','Maybe the Title or Contents is missing ! ');
@@ -119,7 +120,19 @@ class UsersController extends BaseController {
 
     public function getUpdate($id){
         $post = DB::table('content')->where('author_id', Auth::User()->id)
-            ->where('id', $id )->get();
+                                    ->where('id', $id )->get();
         return View::make('content.update')->with('post', $post);
     }
+
+    public function postUpdate($id){
+        DB::table('content')
+            ->where('id', $id)
+            ->where('author_id', Auth::User()->id)
+            ->update(array('title' => Input::get('title'),
+                            'text'=> Input::get('content'),
+                            'tag' => Input::get('tag')));
+        return Redirect::to('users/dashboard')->with('message','Post Updated');
+    }
+
+
 }
