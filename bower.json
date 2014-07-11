@@ -16,7 +16,6 @@
   "dependencies": {
     "bootstrap": "~3.1.1",
     "jquery": "~2.1.1",
-    "ckeditor": "~4.4.2",
     "Font-Awesome": "~4.1.0",
     "tinymce": "~4.1.0"
   }
