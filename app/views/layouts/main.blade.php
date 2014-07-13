@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ HTML::style('bower/bootstrap/dist/css/bootstrap.min.css') }}
     {{ HTML::style('bower/Font-Awesome/css/font-awesome.min.css') }}
+    {{ HTML::style('bower/animate.css/animate.min.css') }}
     {{ HTML::style('main.css') }}
     <link rel="shortcut icon" href="{{{ asset('favicon.ico') }}}">
 </head>
