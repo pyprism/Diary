@@ -5,7 +5,9 @@
 
 <p>Welcome to your Dashboard. You rock bitch :D !</p>
 @if(!$contents)
-<p class="alert alert-info" > Ops you don't have any post !</p>
+<div class="row">
+<p class="alert alert-warning col-md-4 col-md-offset-4" > Ops you don't have any post !</p>
+</div>
 @else
 <table class="table table-bordered table-hover">
     <thead>
