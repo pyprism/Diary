@@ -1,3 +1,3 @@
 Diary
 =====
-Simple laravel based Diary Application to keep daily notes.
+Simple laravel based Diary to keep daily notes.
