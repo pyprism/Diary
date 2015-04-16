@@ -5,3 +5,5 @@ app/config/database.php
 public/bower/
 storage/
 .env
+
+Hiren/bower
