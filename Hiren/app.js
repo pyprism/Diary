@@ -25,4 +25,13 @@ angular.module('Hiren', ['ngResource', 'ngRoute', 'satellizer'] )
                controller: 'NewCtrl'
            });
         $locationProvider.html5Mode(true);
+
+        //conf for satellizer
+        $authProvider.loginRedirect = '/';   // change
+        $authProvider.signupRedirect = '/login';
+        $authProvider.loginUrl = 'http://localhost:8000/login';
+        $authProvider.signupUrl = '/auth/signup';
+        $authProvider.loginRoute = '/';
+        $authProvider.signupRoute = '/signup';
+        $authProvider.platform = 'browser'; // or 'mobile'
     });
