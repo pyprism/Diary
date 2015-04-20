@@ -28,9 +28,10 @@ angular.module('Hiren', ['ngResource', 'ngRoute', 'satellizer'] )
 
         //conf for satellizer
         $authProvider.loginRedirect = '/';   // change
-        $authProvider.signupRedirect = '/login';
+        $authProvider.signupRedirect = '/';
+        $authProvider.logoutRedirect = '/';
         $authProvider.loginUrl = 'http://localhost:8000/login';
-        $authProvider.signupUrl = '/auth/signup';
+      //  $authProvider.signupUrl = '/auth/signup';
         $authProvider.loginRoute = '/';
         $authProvider.signupRoute = '/signup';
         $authProvider.platform = 'browser'; // or 'mobile'
