@@ -4,8 +4,10 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use App\Post;
+use Request;
 
-class posts extends Controller {
+class PostsController extends Controller {
 
 	/**
 	 * Display a listing of the resource.
@@ -14,7 +16,8 @@ class posts extends Controller {
 	 */
 	public function index()
 	{
-		//
+		$posts = Post::all();   //TODO get loggedin user id
+        return response()->json([ "data" => $posts ]);
 	}
 
 	/**
@@ -24,7 +27,11 @@ class posts extends Controller {
 	 */
 	public function create()
 	{
-		//
+		$post = new Post;
+        $post->title = Request::input('title');
+        $post->post = Request::input('post');
+        $post->title = Request::input('title');
+        $post->title = Request::input('title');
 	}
 
 	/**
