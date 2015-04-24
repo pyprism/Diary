@@ -6,7 +6,7 @@ angular.module('Hiren')
         $scope.login = function() {
             $auth.login({ email: $scope.email, password: $scope.password})
                 .then(function(response) {
-                    console.log(response.data.token);
+                    console.log(response.status);
                 })
                 .catch(function(response) {
                     sweetAlert("Oops...", "Email/Password is not correct", "error");
