@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Hiren </title>
+    {% load render_bundle from webpack_loader %}
+    {% render_bundle 'main' 'css' %}
+</head>
+<body>
+<div class='container' id='app'></div>
+{% render_bundle 'main' 'js' %}
+</body>
+</html>
