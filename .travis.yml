@@ -5,7 +5,6 @@ python:
 
 cache: pip
 
-sudo: false
 
 addons:
   postgresql: "9.3"
