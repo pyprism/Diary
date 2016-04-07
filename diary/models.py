@@ -1,3 +1,12 @@
 from django.db import models
 
-# Create your models here.
+
+class Diary(models.Model):
+    title = models.CharField()
+    content = models.TextField()
+    date = models.DateTimeField()
+
+
+class Notes(models.Model):
+    content = models.TextField()
+    date = models.DateTimeField()
