@@ -1,18 +1,17 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from .models import Tag, Notes, Diary
 from django.utils import timezone
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, APIClient
 from django.contrib.auth.models import User
-from .views import UserViewSet
 from rest_framework_jwt.views import obtain_jwt_token
 
 
-
-class ModelTest(TestCase):
+class ModelTest(TransactionTestCase):
     """
     Test all models
     """
     current_date_time = timezone.now()
+    reset_sequences = True
 
     def setUp(self):
         tag = Tag.objects.create(name="Test tag")
@@ -33,7 +32,7 @@ class ModelTest(TestCase):
         note_result = Notes.objects.get(content="test content ")
         self.assertEqual(note_result.content, "test content ")
 
-        self.assertEqual(note_result.tag.id, 2)
+        self.assertEqual(note_result.tag.id, 1)
 
     def test_diary_model(self):
         diary_item = Diary.objects.all()
@@ -47,9 +46,9 @@ class ModelTest(TestCase):
         self.assertEqual(diary_result.date, self.current_date_time)
 
 
-class ViewTest(TestCase):
+class AuthTest(TestCase):
     """
-    Test all views
+    Test JWT auth  (now I am thinking , do I really need this test ? :/ )
     """
     current_date_time = timezone.now()
 
@@ -59,9 +58,109 @@ class ViewTest(TestCase):
         Notes.objects.create(tag=tag, content="test content ", date=self.current_date_time)
         Diary.objects.create(tag=tag, title="Hello title", content="test content", date=self.current_date_time)
 
-    def test_user_viewset(self):
-        factory = APIRequestFactory()
-        request = factory.post('/api-token-auth/', {'username': 'hiren', 'password': 'password'})
+        self.factory = APIRequestFactory()
+
+    def test_jwt_auth(self):
+        request = self.factory.post('/api-token-auth/', {'username': 'hiren', 'password': 'password'})
         response = obtain_jwt_token(request)
         response.render()
         self.assertEqual(response.status_code, 200)
+
+
+class UserViewTest(TransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+
+    def test_login_works(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/api/users/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/users/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_correct_user(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/api/users/')
+        self.assertEqual(response.json(), [{'email': 'a@b.com', 'id': 1, 'username': 'hiren'}])
+
+
+class TagViewTest(TransactionTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+        self.client.force_authenticate(user=self.user)
+        tag = Tag.objects.create(name="Test tag")
+
+    def test_login_works(self):
+        response = self.client.get('/api/tags/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/tags/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_return_correct_tag(self):
+        response = self.client.get('/api/tags/1/')
+        self.assertEqual(response.json(), {'name': 'Test tag', 'id': 1})
+
+    def test_tag_update_works(self):
+        response = self.client.patch('/api/tags/1/', data={'name': 'Updated tag'})
+        self.assertEqual(response.json(), {'name': 'Updated tag', 'id': 1})
+
+    def test_new_tag_creation_works(self):
+        response = self.client.post('/api/tags/', data={'name': 'Updated tag'})
+        self.assertEqual(response.json(), {'name': 'Updated tag', 'id': 2})
+
+    def test_deleting_tag_works(self):
+        self.client.post('/api/tags/', data={'name': 'New tag'})
+        response = self.client.delete('/api/tags/2/')
+        self.assertEqual(response.status_code, 204)
+
+
+class NotesViewTest(TransactionTestCase):
+    reset_sequences = True
+    current_date_time = timezone.now()
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+        self.client.force_authenticate(user=self.user)
+        self.tag = Tag.objects.create(name="Test tag")
+        Notes.objects.create(tag=self.tag, content="test content", date=self.current_date_time)
+
+    def test_login_works(self):
+        response = self.client.get('/api/notes/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/notes/')
+        self.assertEqual(response.status_code, 403)
+
+    #def test_return_correct_note(self):
+    #    response = self.client.get('/api/notes/1/')
+    #    print(response.json())
+    #    self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
+    #                                       'tag': 1, 'date': self.current_date_time})
+
+    # def test_note_update_works(self):
+    #     response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
+    #     self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
+    #                                        'tag': 1, 'date': self.current_date_time})
+    #
+    # def test_new_note_creation_works(self):
+    #     response = self.client.post('/api/notes/', data={'tag': self.tag, 'content': "New content ",
+    #                                                      'date': self.current_date_time})
+    #     self.assertEqual(response.json(), {'tag': 1, 'content': "New content ", 'date': self.current_date_time})
+    #
+    # def test_deleting_note_works(self):
+    #     self.client.post('/api/notes/', data={'tag': self.tag, 'content': "New content !",
+    #                                           'date': self.current_date_time})
+    #     response = self.client.delete('/api/notes/2/')
+    #     self.assertEqual(response.status_code, 204)
