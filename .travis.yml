@@ -12,6 +12,7 @@ addons:
 install:
   - pip install -r requirements.txt --quiet
   - pip install coveralls
+  - pip install codecov
 
 before_script:
   - psql -c "CREATE DATABASE travisci;" -U postgres
@@ -21,4 +22,6 @@ script:
   - python manage.py test
   - coverage run --source=diary manage.py test diary
 
-after_success: coveralls
+after_success:
+  - coveralls
+  - codecov
