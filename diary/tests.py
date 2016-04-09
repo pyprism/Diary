@@ -68,6 +68,9 @@ class AuthTest(TestCase):
 
 
 class UserViewTest(TransactionTestCase):
+    """
+    Test User View
+    """
     reset_sequences = True
 
     def setUp(self):
@@ -90,6 +93,9 @@ class UserViewTest(TransactionTestCase):
 
 
 class TagViewTest(TransactionTestCase):
+    """
+        Test Tag View
+    """
     reset_sequences = True
 
     def setUp(self):
@@ -125,6 +131,9 @@ class TagViewTest(TransactionTestCase):
 
 
 class NotesViewTest(TransactionTestCase):
+    """
+        Test Notes View
+    """
     reset_sequences = True
     current_date_time = timezone.now()
 
@@ -143,24 +152,69 @@ class NotesViewTest(TransactionTestCase):
         response = self.client.get('/api/notes/')
         self.assertEqual(response.status_code, 403)
 
-    #def test_return_correct_note(self):
-    #    response = self.client.get('/api/notes/1/')
-    #    print(response.json())
-    #    self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
-    #                                       'tag': 1, 'date': self.current_date_time})
+    def test_return_correct_note(self):
+        response = self.client.get('/api/notes/1/')
+        self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
+                                           'tag': 1, 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
 
-    # def test_note_update_works(self):
-    #     response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
-    #     self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
-    #                                        'tag': 1, 'date': self.current_date_time})
-    #
-    # def test_new_note_creation_works(self):
-    #     response = self.client.post('/api/notes/', data={'tag': self.tag, 'content': "New content ",
-    #                                                      'date': self.current_date_time})
-    #     self.assertEqual(response.json(), {'tag': 1, 'content': "New content ", 'date': self.current_date_time})
-    #
-    # def test_deleting_note_works(self):
-    #     self.client.post('/api/notes/', data={'tag': self.tag, 'content': "New content !",
-    #                                           'date': self.current_date_time})
-    #     response = self.client.delete('/api/notes/2/')
-    #     self.assertEqual(response.status_code, 204)
+    def test_note_update_works(self):
+        response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
+        self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
+                                           'tag': 1, 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
+
+    def test_new_note_creation_works(self):
+        response = self.client.post('/api/notes/', data={'tag': self.tag.id, 'content': "New content",
+                                                         'date': self.current_date_time})
+        self.assertEqual(response.json(), {'id': 2, 'tag': self.tag.id, 'content': "New content",
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
+
+    def test_deleting_note_works(self):
+        self.client.post('/api/notes/', data={'tag': self.tag.id, 'content': "New content !",
+                                              'date': self.current_date_time})
+        response = self.client.delete('/api/notes/2/')
+        self.assertEqual(response.status_code, 204)
+
+
+class DiaryViewTest(TransactionTestCase):
+    """
+        Test Diary View
+    """
+    reset_sequences = True
+    current_date_time = timezone.now()
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+        self.client.force_authenticate(user=self.user)
+        self.tag = Tag.objects.create(name="Test tag")
+        Diary.objects.create(tag=self.tag, title="Hello title", content="test content", date=self.current_date_time)
+
+    def test_login_works(self):
+        response = self.client.get('/api/diary/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/diary/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_return_correct_diary_object(self):
+        response = self.client.get('/api/diary/1/')
+        self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
+                                           'tag': 1, 'title': 'Hello title', 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
+
+    def test_diary_update_works(self):
+        response = self.client.patch('/api/diary/1/', data={'content': 'Updated content'})
+        self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
+                                           'tag': 1, 'title': 'Hello title', 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
+
+    def test_new_diary_creation_works(self):
+        response = self.client.post('/api/diary/', data={'tag': self.tag.id, 'content': "New content",
+                                                         'date': self.current_date_time, 'title': 'New Title'})
+        self.assertEqual(response.json(), {'id': 2, 'tag': self.tag.id, 'content': "New content",
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'), 'title': 'New Title' })
+
+    def test_deleting_diary_works(self):
+        self.client.post('/api/diary/', data={'tag': self.tag.id, 'content': "New content !",
+                                              'date': self.current_date_time, 'title': 'Delete me :D '})
+        response = self.client.delete('/api/diary/2/')
+        self.assertEqual(response.status_code, 204)
