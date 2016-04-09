@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_swagger',
     'diary',
-    'webpack_loader'
+    'webpack_loader',
+    'django_extensions',
 ]
 
 MIDDLEWARE_CLASSES = [
