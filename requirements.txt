@@ -1,5 +1,5 @@
 Django==1.9.5
-django-extensions==1.6.2
+django-extensions==1.6.3
 django-rest-swagger==0.3.6
 django-webpack-loader==0.3.0
 djangorestframework==3.3.3
