@@ -1,21 +1,21 @@
-import $ from 'jquery';
+import axios from 'axios';
 
 export default class Auth {
     static login(username, password) {
-        $.ajax({
-            method: 'POST',
+        axios({
+            method: 'post',
             url: '/api-token-auth/',
-            data: {'username': username, 'password': password},
-            success: function(response) {
-                if(response.token) {
-                    sessionStorage.setItem('token', response.token);
-                    window.location.href = "/dashboard";
-                }
-            },
-            error: function(jqXHR, exception) {
-                alert(jqXHR.responseText);
+            data: {
+                'username': username,
+                'password': password
             }
-        });
+        }).then(function (response) {
+            sessionStorage.setItem('token', response.data['token']);
+            window.location.href = "/dashboard";
+            })
+            .catch(function (response) {
+                console.error(response);
+            });
     }
 
     static logout(){
