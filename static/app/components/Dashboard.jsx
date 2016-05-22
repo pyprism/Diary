@@ -1,10 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Helmet from "react-helmet";
-//import Sidebar from "./Sidebar.jsx";
+import { observable, computed } from "mobx";
+import { observer } from "mobx-react";
+import Sidebar from "./Sidebar.jsx";
+import Page from "./Page.jsx";
 
 
-export default class Dashboard extends React.Component {
+@observer export default class Dashboard extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            x: "hello"
+        };
+    }
+
     render() {
         return (
             <div>
@@ -15,12 +26,6 @@ export default class Dashboard extends React.Component {
                     {"rel": "stylesheet", "type":"text/css", "href": "static/css/simple-sidebar.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "static/css/font-awesome.min.css"}
                 ]}
-                   // script={[
-                 // {"src": "static/js/jquery-1.11.2.min.js", "type": "text/javascript"},
-                 // {"src": "static/js/bootstrap.min.js", "type": "text/javascript"},
-                //  {"src": "static/js/sidebar_menu.js", "type": "text/javascript"},
-
-               // ]}
                 />
                 
                 <nav className="navbar navbar-default no-margin">
@@ -28,7 +33,7 @@ export default class Dashboard extends React.Component {
                     <button type="button" className="navbar-toggle collapsed" data-toggle="collapse"  id="menu-toggle">
                       <span className="glyphicon glyphicon-th-large" aria-hidden="true" />
                     </button>
-                    <a className="navbar-brand" href="#"><i className="fa fa-rocket fa-4" /> Hiren</a>
+                    <a className="navbar-brand" href="#"><i className="fa fa-heartbeat fa-4" /> Hiren</a>
                 </div>
 
                 <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -37,6 +42,10 @@ export default class Dashboard extends React.Component {
                             </ul>
                 </div>
     </nav>
+                <div id="wrapper">
+                    <Sidebar />
+                    <Page />
+                </div>
             </div>
         )
     }
