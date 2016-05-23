@@ -22,6 +22,7 @@ import Page from "./Page.jsx";
                 <Helmet
                     title="Diary: Dashboard"
                     link={[
+                    {"rel": "shortcut icon", "href": "static/favicon.ico"},
                     {"rel": "stylesheet", "type": "text/css", "href": "static/css/bootstrap.min.css"},
                     {"rel": "stylesheet", "type":"text/css", "href": "static/css/simple-sidebar.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "static/css/font-awesome.min.css"}
@@ -33,7 +34,7 @@ import Page from "./Page.jsx";
                     <button type="button" className="navbar-toggle collapsed" data-toggle="collapse"  id="menu-toggle">
                       <span className="glyphicon glyphicon-th-large" aria-hidden="true" />
                     </button>
-                    <a className="navbar-brand" href="#"><i className="fa fa-heartbeat fa-4" /> Hiren</a>
+                    <a className="navbar-brand" href="#"><i className="fa fa-heartbeat fa-4" /> Hiren Diary</a>
                 </div>
 
                 <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
