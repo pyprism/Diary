@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom';
 import {Router, Route, browserHistory} from 'react-router';
 import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import Tags from './components/Tags.jsx';
 
 var $script = require("scriptjs");
 
@@ -18,6 +19,7 @@ ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login}> </Route>
         <Route path="/dashboard" component={Dashboard}> </Route>
+        <Route path="/dashboard/tags" component={Tags}> </Route>
     </Router>,
     document.getElementById('app')
 );
