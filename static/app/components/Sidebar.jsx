@@ -26,7 +26,7 @@ export default class Sidebar extends React.Component {
                     </ul>
                 </li>
                 <li>
-                    <a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-cloud-download fa-stack-1x "></i></span>Overview</a>
+                     <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-cloud-download fa-stack-1x "/></span> Tags</Link>
                 </li>
             </ul>
         </div>
