@@ -11,17 +11,17 @@ export default class Sidebar extends React.Component {
             <ul className="sidebar-nav nav-pills nav-stacked" id="menu">
 
                 <li class="active">
-                    <a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x "></i></span> Dashboard</a>
+                    <Link to="/dashboard/" activeStyle={{ color: '#315561'}}><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x " /></span> Dashboard</Link>
                        <ul className="nav-pills nav-stacked bunny" >
                         <li><a href="simple_sidebar_menu.html#">link1</a></li>
                         <li><a href="simple_sidebar_menu.html#">link2</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x "></i></span> Shortcut</a>
+                    <a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x "/></span> Shortcut</a>
                     <ul className="nav-pills nav-stacked bunny">
-                        <li><a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x "></i></span>link1</a></li>
-                        <li><a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x "></i></span>link2</a></li>
+                        <li><a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x "/></span>link1</a></li>
+                        <li><a href="simple_sidebar_menu.html#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-flag fa-stack-1x " /></span>link2</a></li>
 
                     </ul>
                 </li>
