@@ -8,13 +8,8 @@ import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Tags from './components/Tags.jsx';
 
-var $script = require("scriptjs");
 
-$script("../../static/js/jquery-1.11.2.min.js", function() {
-  $script('../../static/js/bootstrap.min.js', function () {
-    $script('../../static/js/sidebar_menu.js')
-  });
-});
+
 ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login}> </Route>
