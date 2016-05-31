@@ -5,7 +5,9 @@ var $script = require("scriptjs");
 
 $script("../../static/js/jquery-1.11.2.min.js", function() {
     $script('../../static/js/bootstrap.min.js', function () {
-        $script('../../static/js/sidebar_menu.js')
+        $script('../../static/js/sidebar_menu.js', function () {
+            $script('../../static/js/sweetalert.min.js');
+        })
     });
 });
 
@@ -19,7 +21,8 @@ export default class Bunny extends React.Component {
                     {"rel": "shortcut icon", "href": "/static/favicon.ico"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/css/bootstrap.min.css"},
                     {"rel": "stylesheet", "type":"text/css", "href": "/static/css/simple-sidebar.css"},
-                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/font-awesome.min.css"}
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/font-awesome.min.css"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/sweetalert.css"}
                 ]}
                 />
 
