@@ -1,0 +1,20 @@
+{
+  "name": "diary",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Ashutosh Das"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/pyprism/Diary",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jqcloud2": "^2.0.2"
+  }
+}
