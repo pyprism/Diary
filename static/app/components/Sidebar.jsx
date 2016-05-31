@@ -3,6 +3,11 @@ import {Link} from 'react-router';
 
 
 export default class Sidebar extends React.Component {
+
+    logout(){
+        sessionStorage.removeItem('token');
+    }
+
     render() {
         return (
             <div>
@@ -26,7 +31,10 @@ export default class Sidebar extends React.Component {
                     </ul>
                 </li>
                 <li>
-                     <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-cloud-download fa-stack-1x "/></span> Tags</Link>
+                     <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-tags fa-stack-1x "/></span> Tags</Link>
+                </li>
+                <li>
+                     <Link to="/" activeStyle={{ color: '#315561'}} onclick= { this.logout }> <span className="fa-stack fa-lg pull-left"><i className="fa fa-sign-out fa-stack-1x "/></span> Log Out</Link>
                 </li>
             </ul>
         </div>
