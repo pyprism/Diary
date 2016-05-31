@@ -10,11 +10,13 @@ export default class Auth {
                 'password': password
             }
         }).then(function (response) {
-            sessionStorage.setItem('token', response.data['token']);
-            window.location.href = "/dashboard";
+            if (response.data['token']) {
+                sessionStorage.setItem('token', response.data['token']);
+                window.location.href = "/dashboard";
+            }
             })
             .catch(function (response) {
-                console.error(response);
+                sweetAlert("Oops!", response.data.non_field_errors[0], "error");
             });
     }
 
