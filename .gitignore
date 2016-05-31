@@ -64,3 +64,4 @@ target/
 config.local.json
 .idea/
 .env/
+static/bower/
