@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 import Helmet from "react-helmet";
 import Auth from "../ajax/Auth.jsx";
 
+var $script = require("scriptjs");
+
+$script("../../static/js/sweetalert.min.js");
+
 export default class Login extends React.Component {
         render () {
         return <div className="login">
@@ -10,7 +14,9 @@ export default class Login extends React.Component {
                 title="Hiren-Diary: Login"
                 link={[
                     {"rel": "stylesheet", "href": "static/css/login.css"},
-                    {"rel": "icon", "href": "static/favicon.ico"}
+                    {"rel": "icon", "href": "static/favicon.ico"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/sweetalert.css"}
+
                 ]}
             />
                 <form onSubmit={this.login.bind(this)}>
