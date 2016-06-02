@@ -1,7 +1,6 @@
 import {observable, computed, autorun} from 'mobx';
 import axios from "axios";
-//import swal from "sweetalert";
-
+import crypt from "../components/Crypt.jsx";
 
 export default class Tags_Ajax {
     static checkToken() {
