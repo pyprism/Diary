@@ -5,7 +5,7 @@ import Auth from "../ajax/Auth.jsx";
 
 var $script = require("scriptjs");
 
-$script("../../static/js/sweetalert.min.js");
+$script("../../static/bower/sweetalert/dist/sweetalert.min.js");
 
 export default class Login extends React.Component {
         render () {
@@ -15,7 +15,7 @@ export default class Login extends React.Component {
                 link={[
                     {"rel": "stylesheet", "href": "static/css/login.css"},
                     {"rel": "icon", "href": "static/favicon.ico"},
-                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/sweetalert.css"}
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/sweetalert/dist/sweetalert.css"}
 
                 ]}
             />
