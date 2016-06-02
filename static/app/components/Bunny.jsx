@@ -6,7 +6,13 @@ var $script = require("scriptjs");
 $script("../../static/js/jquery-1.11.2.min.js", function() {
     $script('../../static/js/bootstrap.min.js', function () {
         $script('../../static/js/sidebar_menu.js', function () {
-            $script('../../static/js/sweetalert.min.js');
+            $script('../../static/bower/sweetalert/dist/sweetalert.min.js', function() {
+                $script('../../static/bower/jqcloud2/dist/jqcloud.min.js', function () {
+                    $script('../../static/bower/summernote/dist/summernote.min.js', function () {
+                        $script('../../static/bower/openpgp/dist/openpgp.min.js');
+                    });
+                });
+            });
         })
     });
 });
@@ -22,7 +28,9 @@ export default class Bunny extends React.Component {
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/css/bootstrap.min.css"},
                     {"rel": "stylesheet", "type":"text/css", "href": "/static/css/simple-sidebar.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/css/font-awesome.min.css"},
-                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/sweetalert.css"}
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/sweetalert/dist/sweetalert.css"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/jqcloud2/dist/jqcloud.css"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/summernote/dist/summernote.css"}
                 ]}
                 />
 
