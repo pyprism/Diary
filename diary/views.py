@@ -5,6 +5,9 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from .serializers import UserSerializer, TagSerializer, NotesSerializer, DiarySerializer
 from .models import Tag, Diary, Notes
+from django.core import serializers
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -23,6 +26,19 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
+    @detail_route(methods=['get'])
+    def cloud(self, request, *args, **kwargs):
+        """
+        Get tag cloud items
+        """
+        cloud = {}
+        tags = Tag.objects.all()
+        for i in tags:
+            hiren = Diary.objects.filter(tag=i).count()
+            cloud[i.name] = hiren
+        data = serializers.serialize("json", cloud)
+        return Response(data)
 
 
 class NotesViewset(viewsets.ModelViewSet):
