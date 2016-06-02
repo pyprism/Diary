@@ -65,3 +65,4 @@ config.local.json
 .idea/
 .env/
 static/bower/
+static/js/bundle.js
