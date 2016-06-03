@@ -6,6 +6,7 @@ var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
+    devtool: 'source-map',
     entry: [
         './static/app/app.jsx'
     ],
@@ -29,6 +30,12 @@ module.exports = {
     plugins: process.env.NODE_ENV === 'production' ? [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurrenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin({
+		compress: { warnings: false },
+      		comments: false,
+      		sourceMap: true,
+      		mangle: true,
+      		minimize: true
+	})
     ] : [new BundleTracker({filename: './webpack-stats.json'})],
 };
