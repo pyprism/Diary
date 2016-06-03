@@ -66,3 +66,4 @@ config.local.json
 .env/
 static/bower/
 static/js/bundle.js
+static/js/bundle.js.map
