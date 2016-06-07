@@ -44,19 +44,7 @@ import SetSecretKey from "./SetSecretKey.jsx";
 
         return (
             <div>
-                <Bunny />
-                <div id="wrapper">
-                    <Sidebar />
-                    <div id="page-content-wrapper">
-                        <div className="container-fluid xyz">
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    { secretkey }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                { secretkey }
             </div>
         )
     }
