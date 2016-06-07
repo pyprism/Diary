@@ -16,25 +16,13 @@ export default class Tags extends React.Component {
     render() {
         return (
             <div>
-                <Bunny />
-                <div id="wrapper">
-                    <Sidebar />
-                    <div id="page-content-wrapper">
-                        <div className="container-fluid xyz">
-                            <div className="row">
-                                <div className="col-lg-12">
-                                    <form onSubmit={this.newTag.bind(this)}>
-                                        <div className="form-group">
-                                            <label>Create New Tag</label>
-                                            <input type="text" className="form-control" required ref="new_tag" placeholder="New Tag Name" />
-                                        </div>
-                                        <button type="submit" className="btn btn-default"><i className="fa fa-bookmark"> Save</i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                <form onSubmit={this.newTag.bind(this)}>
+                    <div className="form-group">
+                        <label>Create New Tag</label>
+                        <input type="text" className="form-control" required ref="new_tag" placeholder="New Tag Name" />
                     </div>
-                </div>
+                    <button type="submit" className="btn btn-default"><i className="fa fa-bookmark"> Save</i></button>
+                </form>
             </div>
         )
     }
