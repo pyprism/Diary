@@ -129,6 +129,10 @@ class TagViewTest(TransactionTestCase):
         response = self.client.delete('/api/tags/2/')
         self.assertEqual(response.status_code, 204)
 
+    def test_tag_cloud_works(self):
+        response = self.client.get('/api/tags/cloud/')
+        print(response.json())
+
 
 class NotesViewTest(TransactionTestCase):
     """
