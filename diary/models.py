@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=500, unique=True)
 
 
 class Diary(models.Model):
@@ -16,3 +16,7 @@ class Notes(models.Model):
     content = models.TextField()
     date = models.DateTimeField()
     tag = models.ForeignKey('Tag')
+
+
+class Secret(models.Model):
+    key = models.CharField(max_length=500)
