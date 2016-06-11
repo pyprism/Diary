@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Diary, Notes, Tag
+from .models import Diary, Notes, Tag, Secret
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,3 +23,9 @@ class NotesSerializer(serializers.ModelSerializer):
 class DiarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Diary
+
+
+class SecretSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Secret
+
