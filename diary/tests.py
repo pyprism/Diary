@@ -97,12 +97,15 @@ class TagViewTest(TransactionTestCase):
         Test Tag View
     """
     reset_sequences = True
+    current_date_time = timezone.now()
 
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
         self.client.force_authenticate(user=self.user)
-        tag = Tag.objects.create(name="Test tag")
+        self.tag = Tag.objects.create(name="Test tag")
+        Diary.objects.create(tag=self.tag, title="Hello title", content="test content", date=self.current_date_time)
+
 
     def test_login_works(self):
         response = self.client.get('/api/tags/')
@@ -131,7 +134,7 @@ class TagViewTest(TransactionTestCase):
 
     def test_tag_cloud_works(self):
         response = self.client.get('/api/tags/cloud/')
-        print(response.json())
+        self.assertEqual(response.json(), {'Test tag': 1})
 
 
 class NotesViewTest(TransactionTestCase):
