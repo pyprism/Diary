@@ -230,3 +230,40 @@ class DiaryViewTest(TransactionTestCase):
                                               'date': self.current_date_time, 'title': 'Delete me :D '})
         response = self.client.delete('/api/diary/2/')
         self.assertEqual(response.status_code, 204)
+
+
+class SecretViewTest(TransactionTestCase):
+    """
+    Test Secret View
+    """
+    reset_sequences = True
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+        self.client.force_authenticate(user=self.user)
+        self.secret = Secret.objects.create(key="secret key")
+
+    def test_login_works(self):
+        response = self.client.get('/api/secret/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/secret/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_return_correct_secret_object(self):
+        response = self.client.get('/api/secret/1/')
+        self.assertEqual(response.json(), {'id': 1, 'key': 'secret key'})
+
+    def test_deleting_secret_object_fail(self):
+        response = self.client.delete('/api/secret/1/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_creating_second_object_fail(self):
+        response = self.client.post('/api/secret/', data={'key': "bunny"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_secret_key_update_works(self):
+        response = self.client.patch('/api/secret/1/', data={'key': 'new key'})
+        self.assertEqual(response.json(), {'id': 1, 'key': 'new key'})
