@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from .serializers import UserSerializer, TagSerializer, NotesSerializer, DiarySerializer, SecretSerializer
 from .models import Tag, Diary, Notes, Secret
-from django.core import serializers
-from rest_framework.decorators import detail_route, list_route
+from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from rest_framework import status
 
