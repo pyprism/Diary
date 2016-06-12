@@ -9,13 +9,13 @@ class Diary(models.Model):
     title = models.CharField(max_length=500)
     content = models.TextField()
     date = models.DateTimeField()
-    tag = models.ForeignKey('Tag')
+    tag = models.ForeignKey('Tag', null=True)
 
 
 class Notes(models.Model):
     content = models.TextField()
     date = models.DateTimeField()
-    tag = models.ForeignKey('Tag')
+    tag = models.ForeignKey('Tag', null=True)
 
 
 class Secret(models.Model):
