@@ -26,6 +26,7 @@ router.register(r'users', views.UserViewSet)
 router.register(r'tags', views.TagViewSet)
 router.register(r'notes', views.NotesViewset)
 router.register(r'diary', views.DiaryViewset)
+router.register(r'secret', views.SecretViewset)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
