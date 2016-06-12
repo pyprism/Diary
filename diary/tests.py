@@ -1,5 +1,5 @@
 from django.test import TestCase, TransactionTestCase
-from .models import Tag, Notes, Diary
+from .models import Tag, Notes, Diary, Secret
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, APIClient
 from django.contrib.auth.models import User
@@ -17,6 +17,7 @@ class ModelTest(TransactionTestCase):
         tag = Tag.objects.create(name="Test tag")
         Notes.objects.create(tag=tag, content="test content ", date=self.current_date_time)
         Diary.objects.create(tag=tag, title="Hello title", content="test content", date=self.current_date_time)
+        Secret.objects.create(key="blah blah bunny")
 
     def test_tag_model(self):
         tag_item = Tag.objects.all()
@@ -44,6 +45,10 @@ class ModelTest(TransactionTestCase):
         self.assertEqual(diary_result.tag.id, 1)
 
         self.assertEqual(diary_result.date, self.current_date_time)
+
+    def test_secret_model(self):
+        secret_item = Secret.objects.all()
+        self.assertEqual(secret_item.count(), 1)
 
 
 class AuthTest(TestCase):
