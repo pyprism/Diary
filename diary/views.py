@@ -62,7 +62,7 @@ class DiaryViewset(viewsets.ModelViewSet):
 
 class SecretViewset(viewsets.ModelViewSet):
     """
-        API endpoint that allows secret key  to be created, viewed ,edited and deleted.
+        API endpoint that allows secret key  to be created, viewed ,edited.
     """
     authentication_classes = (SessionAuthentication, BasicAuthentication, JSONWebTokenAuthentication)
     permission_classes = (IsAuthenticated,)
@@ -71,7 +71,7 @@ class SecretViewset(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Check if secret key already created
+        Check if secret key already exists
         """
         count = Secret.objects.all().count()
         if count == 1:
