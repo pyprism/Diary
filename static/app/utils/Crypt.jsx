@@ -5,19 +5,22 @@ export default class Crypt {
    //     this.openpgp.config.aead_protect = true;
    // }
 
-    static encrypt(password, data) {
+    static *encrypt(password, data) {
         var options, encrypted;
         options = {
             data: data,
             passwords: [password]
         };
+        let openpgp = window.openpgp;
         openpgp.initWorker({ path:'../../static/bower/openpgp/dist/openpgp.worker.min.js' });
         openpgp.config.aead_protect = true;
-        openpgp.encrypt(options).then(function(ciphertext) {
+       /* openpgp.encrypt(options).then(function(ciphertext) {
             //return encrypted = ciphertext.data;
             console.log(ciphertext.data);
-            return ciphertext.data;
-        });
+            //return ciphertext.data;
+        });*/
+        let bunny = yield openpgp.encrypt(options);
+        return bunny.data;
     }
 
     /*decrypt(password, data) {
