@@ -31,13 +31,20 @@ function authRequired(nextState, replace) {
 
 }
 
+function keyRequired(nextState, replace){
+    if(!sessionStorage.getItem('key')) {
+        replace('/dashboard/secret/');
+        sweetAlert("Oops!", 'Secret Key Required', "info");
+    }
+}
+
 ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login} />
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
-            <Route path="stats" component={Dashboard} />
+            <Route path="stats" onEnter={keyRequired} component={Dashboard} />
             <Route path="secret" component={Secret} />
-            <Route path="tags" component={Tags} />
+            <Route path="tags" onEnter={keyRequired} component={Tags} />
         </Route>
 
     </Router>,
