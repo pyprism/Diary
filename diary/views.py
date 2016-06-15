@@ -78,14 +78,22 @@ class SecretViewset(viewsets.ModelViewSet):
             content = {'error': 'key already exits'}
             return Response(content, status.HTTP_403_FORBIDDEN)
         else:
-            instance = self.get_object()
+            instance = self.request.data['key']
             Secret.objects.create(key=instance)
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data, status.HTTP_201_CREATED)
+            response = {"done": "key created"}
+            return Response(response, status.HTTP_201_CREATED)
 
-    def destroy(self, request, pk=None):
+    def destroy(self, request, pk=None, *args, **kwargs):
         bunny = {'error': 'method not supported :/'}
         return Response(bunny, status.HTTP_403_FORBIDDEN)
+
+    def list(self, request, *args, **kwargs):
+        query = Secret.objects.all()
+        if query.count() == 0:
+            return Response(" :P ", status.HTTP_404_NOT_FOUND)
+        else:
+            serializer = self.get_serializer(query, many=True)
+            return Response(serializer.data)
 
 
 
