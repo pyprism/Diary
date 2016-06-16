@@ -3,13 +3,15 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Router, Route, browserHistory} from 'react-router';
+import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import Tags from './components/Tags.jsx';
 import Main from './components/Main.jsx';
 import axios from 'axios';
 import Secret from './components/Secret.jsx';
+import Editor from './components/Editor.jsx';
+import Posts from './components/Posts.jsx';
 
 
 function authRequired(nextState, replace) {
@@ -21,9 +23,12 @@ function authRequired(nextState, replace) {
             data: {
                 'token': token
             }
+        }).then(function (res) {
+            console.log(res);
         }).catch(function(response) {
-            console.log(response);
             replace('/');
+            console.log(response);
+            sweetAlert("Oops!", 'Token Expired', "info");
         });
     } else {
         replace('/');
@@ -42,8 +47,11 @@ ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login} />
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
+            <IndexRoute onEnter={keyRequired}  component={Dashboard}/>
             <Route path="stats" onEnter={keyRequired} component={Dashboard} />
             <Route path="secret" component={Secret} />
+            <Route path="create" component={Editor} />
+            <Route path="posts" component={Posts} />
             <Route path="tags" onEnter={keyRequired} component={Tags} />
         </Route>
 
