@@ -10,7 +10,13 @@ $script("../../static/js/jquery-1.11.2.min.js", function() {
             $script('../../static/bower/sweetalert/dist/sweetalert.min.js', function() {
                 $script('../../static/bower/jqcloud2/dist/jqcloud.min.js', function () {
                     $script('../../static/bower/summernote/dist/summernote.min.js', function () {
-                        $script('../../static/bower/openpgp/dist/openpgp.min.js');
+                        $script('../../static/bower/openpgp/dist/openpgp.min.js', function () {
+                            $script('../../static/js/editor.js', function () {
+                                $script('../../static/bower/moment/min/moment.min.js', function () {
+                                    $script('../../static/bower/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
+                                })
+                            });
+                        });
                     });
                 });
             });
@@ -38,7 +44,8 @@ export default class Main extends React.Component {
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/css/font-awesome.min.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/sweetalert/dist/sweetalert.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/jqcloud2/dist/jqcloud.css"},
-                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/summernote/dist/summernote.css"}
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/summernote/dist/summernote.css"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css"}
                 ]}
                 />
 
@@ -63,12 +70,12 @@ export default class Main extends React.Component {
                     <ul className="sidebar-nav nav-pills nav-stacked" id="menu">
 
                         <li class="active">
-                            <Link to="/dashboard/stats" activeStyle={{ color: '#315561'}}><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x " /></span> Dashboard</Link>
+                            <Link to="/dashboard/stats/" activeStyle={{ color: '#315561'}}><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x " /></span> Dashboard</Link>
                         </li>
                         <li>
-                            <a href="#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-archive fa-stack-1x "/></span> Posts</a>
+                            <Link to="/dashboard/posts/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-archive fa-stack-1x "/></span> Posts</Link>
                             <ul className="nav-pills nav-stacked bunny">
-                                <li><a href="#"><span className="fa-stack fa-lg pull-left"><i className="fa fa-file-text fa-stack-1x "/></span> Create New Post</a></li>
+                                <li><Link to="/dashboard/create/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-file-text fa-stack-1x "/></span> Create New Post</Link></li>
                             </ul>
                         </li>
                         <li>
