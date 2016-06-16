@@ -16,7 +16,12 @@ export default class Secret extends React.Component {
             url: '/api/secret/',
             headers: {'Authorization': "JWT " + sessionStorage.getItem('token')}
         }).then(function (response) {
-            console.log(response.data[0].key);
+            Crypt.decrypt(secret, response.data[0].key).then(function (bunny) {
+                sessionStorage.setItem('key', bunny.data);
+                browserHistory.push('/dashboard/stats/');
+            }).catch(function (err) {
+                sweetAlert("Oops!", "Key is not valid !", "error");
+            })
         }).catch(function (response) {
             if(response.status == 404){
                 Crypt.encrypt(secret, random).then(function (bunny) {
