@@ -44,7 +44,7 @@ import SetSecretKey from "./SetSecretKey.jsx";
 
         return (
             <div>
-                { secretkey }
+                I am dumb dashboard
             </div>
         )
     }
