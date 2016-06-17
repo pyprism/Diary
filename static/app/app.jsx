@@ -50,8 +50,8 @@ ReactDOM.render(
             <IndexRoute onEnter={keyRequired}  component={Dashboard}/>
             <Route path="stats" onEnter={keyRequired} component={Dashboard} />
             <Route path="secret" component={Secret} />
-            <Route path="create" component={Editor} />
-            <Route path="posts" component={Posts} />
+            <Route path="create" onEnter={keyRequired} component={Editor} />
+            <Route path="posts" onEnter={keyRequired}component={Posts} />
             <Route path="tags" onEnter={keyRequired} component={Tags} />
         </Route>
 
