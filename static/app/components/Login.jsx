@@ -4,9 +4,9 @@ import Helmet from "react-helmet";
 import axios from 'axios';
 import { browserHistory } from 'react-router';
 
-var $script = require("scriptjs");
+/*var $script = require("scriptjs");
 
-$script("../../static/bower/sweetalert/dist/sweetalert.min.js");
+$script("../../static/bower/sweetalert/dist/sweetalert.min.js");*/
 
 export default class Login extends React.Component {
 
