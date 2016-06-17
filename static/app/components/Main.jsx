@@ -1,8 +1,10 @@
 import React from 'react';
 import Helmet from "react-helmet";
 import {Link} from 'react-router';
+import { browserHistory } from 'react-router';
 
-var $script = require("scriptjs");
+
+/*var $script = require("scriptjs");
 
 $script("../../static/js/jquery-1.11.2.min.js", function() {
     $script('../../static/js/bootstrap.min.js', function () {
@@ -22,15 +24,15 @@ $script("../../static/js/jquery-1.11.2.min.js", function() {
             });
         })
     });
-});
+});*/
 
 export default class Main extends React.Component {
 
     logout(){
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('key');
+        browserHistory.push('/');
     }
-
 
     render() {
         return (
@@ -82,7 +84,7 @@ export default class Main extends React.Component {
                             <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-tags fa-stack-1x "/></span> Tags</Link>
                         </li>
                         <li>
-                            <Link to="/" activeStyle={{ color: '#315561'}} onclick= { this.logout }> <span className="fa-stack fa-lg pull-left"><i className="fa fa-sign-out fa-stack-1x "/></span> Log Out</Link>
+                            <Link  to="#" activeStyle={{ color: '#315561'}} onclick= { this.logout }> <span className="fa-stack fa-lg pull-left"><i className="fa fa-sign-out fa-stack-1x "/></span> Log Out</Link>
                         </li>
                     </ul>
                 </div>
