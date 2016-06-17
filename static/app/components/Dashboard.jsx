@@ -2,8 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { observable, computed } from "mobx";
 import { observer } from "mobx-react";
-import Sidebar from "./Sidebar.jsx";
-import Bunny from "./Bunny.jsx";
 import GetSecretKey from "./GetSecretKey.jsx";
 import SetSecretKey from "./SetSecretKey.jsx";
 
