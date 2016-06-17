@@ -1,6 +1,4 @@
 import React from 'react';
-import Sidebar from './Sidebar.jsx';
-import Bunny from "./Bunny.jsx";
 import Tag_Ajax from "../store/Tag_Store.jsx";
 import ReactDOM from 'react-dom';
 
