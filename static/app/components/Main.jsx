@@ -4,28 +4,6 @@ import {Link} from 'react-router';
 import { browserHistory } from 'react-router';
 
 
-/*var $script = require("scriptjs");
-
-$script("../../static/js/jquery-1.11.2.min.js", function() {
-    $script('../../static/js/bootstrap.min.js', function () {
-        $script('../../static/js/sidebar_menu.js', function () {
-            $script('../../static/bower/sweetalert/dist/sweetalert.min.js', function() {
-                $script('../../static/bower/jqcloud2/dist/jqcloud.min.js', function () {
-                    $script('../../static/bower/summernote/dist/summernote.min.js', function () {
-                        $script('../../static/bower/openpgp/dist/openpgp.min.js', function () {
-                            $script('../../static/js/editor.js', function () {
-                                $script('../../static/bower/moment/min/moment.min.js', function () {
-                                    $script('../../static/bower/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js');
-                                })
-                            });
-                        });
-                    });
-                });
-            });
-        })
-    });
-});*/
-
 export default class Main extends React.Component {
 
     logout(){
