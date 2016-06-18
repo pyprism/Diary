@@ -3,22 +3,31 @@ import ReactDOM from 'react-dom';
 import axios from 'axios';
 import Helmet from "react-helmet";
 import { browserHistory } from 'react-router';
+import Crypt from '../utils/Crypt.jsx';
 
-//var $ = require('../../js/jquery-1.11.2.min');
+
 export default class Editor extends React.Component {
 
     editor(e){
         e.preventDefault();
         console.log('pressed');
+        Crypt.encrypt(sessionStorage.getItem('key'), 'x')
     }
 
     componentDidMount() {
 
         $(ReactDOM.findDOMNode(this)).ready(function () {
-            $('#datetimepicker1').datetimepicker();
+            $('#datetime').datepicker({
+                autoclose: true,
+                format: 'dd/mm/yyyy',
+                clearBtn: true,
+                todayBtn: true,
+                todayHighlight: true,
+                weekStart: 6
+            });
             $('textarea').summernote({
-            height: 300
-        });
+                height: 300
+            });
         })
     }
 
@@ -35,15 +44,18 @@ export default class Editor extends React.Component {
                     </div>
                     <div className="form-group">
                         <label >Content:</label>
-                        <textarea name="text" required ref="post" />
+                        <textarea name="text" required  ref="post" />
                     </div>
-                    <div class="form-group">
-                        <div className='input-group date' id='datetimepicker1'>
-                            <input type='text' class="form-control" />
-                    <span class="input-group-addon">
+                    <div className="form-group">
+                        <div className='input-group date' id='datetime' >
+                    <div className="input-group-addon">
                         <span className="glyphicon glyphicon-calendar" />
-                    </span>
+                    </div>
+                            <input type='text' className="form-control" ref="date" required  placeholder="Date"/>
                         </div>
+                    </div>
+                    <div className="form-group">
+                        <input type="text" className="form-control" ref="tag" id="tag" placeholder="Tag"/>
                     </div>
                     <div className="form-group">
                         <button type="submit" className="btn btn-primary btn-lg btn-block">Save</button>
