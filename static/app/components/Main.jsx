@@ -7,8 +7,7 @@ import { browserHistory } from 'react-router';
 export default class Main extends React.Component {
 
     logout(){
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('key');
+        sessionStorage.clear();
         browserHistory.push('/');
     }
 
@@ -45,27 +44,27 @@ export default class Main extends React.Component {
                     </div>
                 </nav>
 
-                 <div id="wrapper">
+                <div id="wrapper">
                     <div id="sidebar-wrapper">
-                    <ul className="sidebar-nav nav-pills nav-stacked" id="menu">
+                        <ul className="sidebar-nav nav-pills nav-stacked" id="menu">
 
-                        <li class="active">
-                            <Link to="/dashboard/stats/" activeStyle={{ color: '#315561'}}><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x " /></span> Dashboard</Link>
-                        </li>
-                        <li>
-                            <Link to="/dashboard/posts/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-archive fa-stack-1x "/></span> Posts</Link>
-                            <ul className="nav-pills nav-stacked bunny">
-                                <li><Link to="/dashboard/create/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-file-text fa-stack-1x "/></span> Create New Post</Link></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-tags fa-stack-1x "/></span> Tags</Link>
-                        </li>
-                        <li>
-                            <Link  to="#" activeStyle={{ color: '#315561'}} onclick= { this.logout }> <span className="fa-stack fa-lg pull-left"><i className="fa fa-sign-out fa-stack-1x "/></span> Log Out</Link>
-                        </li>
-                    </ul>
-                </div>
+                            <li class="active">
+                                <Link to="/dashboard/stats/" activeStyle={{ color: '#315561'}}><span className="fa-stack fa-lg pull-left"><i className="fa fa-dashboard fa-stack-1x " /></span> Dashboard</Link>
+                            </li>
+                            <li>
+                                <Link to="/dashboard/posts/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-archive fa-stack-1x "/></span> Posts</Link>
+                                <ul className="nav-pills nav-stacked bunny">
+                                    <li><Link to="/dashboard/create/"><span className="fa-stack fa-lg pull-left"><i className="fa fa-file-text fa-stack-1x "/></span> Create New Post</Link></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <Link to="/dashboard/tags" activeStyle={{ color: '#315561'}}> <span className="fa-stack fa-lg pull-left"><i className="fa fa-tags fa-stack-1x "/></span> Tags</Link>
+                            </li>
+                            <li>
+                                <Link  to="#" activeStyle={{ color: '#315561'}} onClick= { this.logout }> <span className="fa-stack fa-lg pull-left"><i className="fa fa-sign-out fa-stack-1x "/></span> Log Out</Link>
+                            </li>
+                        </ul>
+                    </div>
                     <div id="page-content-wrapper">
                         <div className="container-fluid xyz">
                             <div className="row">
