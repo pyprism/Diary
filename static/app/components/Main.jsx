@@ -24,7 +24,7 @@ export default class Main extends React.Component {
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/sweetalert/dist/sweetalert.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/jqcloud2/dist/jqcloud.css"},
                     {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/summernote/dist/summernote.css"},
-                    {"rel": "stylesheet", "type": "text/css", "href": "/static/bower/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css"}
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/bootstrap-datepicker3.standalone.min.css"}
                 ]}
                 />
 
