@@ -12,7 +12,7 @@ module.exports = {
     ],
     output : {
         path: __dirname,
-        filename: './static/js/bundle.js'
+        filename: "./static/js/bundles/[name]-[hash].js"
     },
     module: {
         loaders: [
@@ -30,6 +30,7 @@ module.exports = {
     plugins: process.env.NODE_ENV === 'production' ? [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.NoErrorsPlugin(),
         new webpack.optimize.UglifyJsPlugin({
 		compress: { warnings: false },
       		comments: false,
@@ -37,5 +38,5 @@ module.exports = {
       		mangle: true,
       		minimize: true
 	})
-    ] : [new BundleTracker({filename: './webpack-stats.json'})],
+    ] : [new BundleTracker({filename: './webpack-stats.json'}), new webpack.NoErrorsPlugin()]
 };
