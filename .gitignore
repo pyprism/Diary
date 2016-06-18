@@ -1,5 +1,6 @@
 /node_modules
 # Byte-compiled / optimized / DLL files
+/static/js/bundles
 __pycache__/
 *.py[cod]
 *$py.class
