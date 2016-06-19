@@ -6,7 +6,7 @@ var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
-    devtool: 'source-map',
+    devtool: 'eval',
     entry: [
         './static/app/app.jsx'
     ],
