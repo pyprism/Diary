@@ -5,7 +5,7 @@ django-webpack-loader==0.3.3
 djangorestframework==3.4.0
 djangorestframework-jwt==1.8.0
 psycopg2==2.6.2
-PyJWT==1.4.1
+PyJWT==1.4.2
 PyYAML==3.11
 six==1.10.0
 Werkzeug==0.11.10
