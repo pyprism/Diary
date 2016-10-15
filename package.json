@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/pyprism/Diary#readme",
   "dependencies": {
-    "axios": "^0.15.0",
+    "axios": "^0.15.1",
     "if-env": "^1.0.0",
     "mobx": "^2.2.2",
     "mobx-react": "^3.3.0",
