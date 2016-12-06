@@ -6,9 +6,14 @@ Django==1.9.8
 django-extensions==1.7.5
 >>>>>>> master
 django-rest-swagger==0.3.8
+<<<<<<< HEAD
+django-webpack-loader==0.4.1
+djangorestframework==3.4.7
+=======
 django-webpack-loader==0.3.3
 <<<<<<< HEAD
 djangorestframework==3.5.3
+>>>>>>> master
 djangorestframework-jwt==1.8.0
 =======
 djangorestframework==3.4.7
