@@ -18,14 +18,17 @@ class TagSerializer(serializers.ModelSerializer):
 class NotesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
+        fields = '__all__'
 
 
 class DiarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Diary
+        fields = '__all__'
 
 
 class SecretSerializer(serializers.ModelSerializer):
     class Meta:
         model = Secret
+        fields = '__all__'
 
