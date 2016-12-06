@@ -1,5 +1,6 @@
 coreapi==2.1.1
 Django==1.10.4
+django-extensions==1.7.5
 django-rest-swagger==2.1.0
 django-webpack-loader==0.4.1
 djangorestframework==3.5.3
@@ -10,4 +11,6 @@ psycopg2==2.6.2
 PyJWT==1.4.2
 requests==2.12.3
 simplejson==3.10.0
+six==1.10.0
 uritemplate==3.0.0
+Werkzeug==0.11.11
