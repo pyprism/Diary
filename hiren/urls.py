@@ -23,11 +23,8 @@ from rest_framework_swagger.views import get_swagger_view
 
 
 router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'tags', views.TagViewSet)
 router.register(r'notes', views.NotesViewset)
 router.register(r'diary', views.DiaryViewset)
-router.register(r'secret', views.SecretViewset)
 
 schema_view = get_swagger_view(title="Diary's API")
 
