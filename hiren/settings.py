@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'diary',
     'webpack_loader',
+    'taggit',
     'django_extensions',
 ]
 
@@ -161,9 +162,13 @@ REST_FRAMEWORK = {
     ),
 }
 
+# JWT auth conf
+
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
 }
+
+# webpack loader conf
 
 WEBPACK_LOADER = {
     'DEFAULT': {
