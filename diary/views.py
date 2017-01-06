@@ -3,41 +3,11 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .serializers import UserSerializer, TagSerializer, NotesSerializer, DiarySerializer, SecretSerializer
-from .models import Tag, Diary, Notes, Secret
+from .serializers import NotesSerializer, DiarySerializer
+from .models import Diary, Notes
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from rest_framework import status
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-
-
-class TagViewSet(viewsets.ModelViewSet):
-    """
-        API endpoint that allows tags to be created, viewed ,edited and deleted.
-    """
-    authentication_classes = (SessionAuthentication, BasicAuthentication, JSONWebTokenAuthentication)
-    permission_classes = (IsAuthenticated,)
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-
-    @list_route(methods=['get'])
-    def cloud(self, request, *args, **kwargs):
-        """
-        Get tag cloud items
-        """
-        cloud = {}
-        tags = Tag.objects.all()
-        for i in tags:
-            hiren = Diary.objects.filter(tag=i).count()
-            cloud[i.name] = hiren
-        return Response(cloud)
 
 
 class NotesViewset(viewsets.ModelViewSet):
@@ -58,42 +28,3 @@ class DiaryViewset(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Diary.objects.all()
     serializer_class = DiarySerializer
-
-
-class SecretViewset(viewsets.ModelViewSet):
-    """
-        API endpoint that allows secret key  to be created, viewed ,edited.
-    """
-    authentication_classes = (SessionAuthentication, BasicAuthentication, JSONWebTokenAuthentication)
-    permission_classes = (IsAuthenticated,)
-    queryset = Secret.objects.all()
-    serializer_class = SecretSerializer
-
-    def create(self, request, *args, **kwargs):
-        """
-        Check if secret key already exists
-        """
-        count = Secret.objects.all().count()
-        if count == 1:
-            content = {'error': 'key already exits'}
-            return Response(content, status.HTTP_403_FORBIDDEN)
-        else:
-            instance = self.request.data['key']
-            Secret.objects.create(key=instance)
-            response = {"done": "key created"}
-            return Response(response, status.HTTP_201_CREATED)
-
-    def destroy(self, request, pk=None, *args, **kwargs):
-        bunny = {'error': 'method not supported :/'}
-        return Response(bunny, status.HTTP_403_FORBIDDEN)
-
-    def list(self, request, *args, **kwargs):
-        query = Secret.objects.all()
-        if query.count() == 0:
-            return Response(" :P ", status.HTTP_404_NOT_FOUND)
-        else:
-            serializer = self.get_serializer(query, many=True)
-            return Response(serializer.data)
-
-
-
