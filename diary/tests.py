@@ -96,15 +96,15 @@ class NotesViewTest(TransactionTestCase):
                                            'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                                            'created_at': '2012-01-14T00:00:00Z',
                                            'updated_at': '2012-01-14T00:00:00Z'})
-    #
-    # @freeze_time("2012-01-14")
-    # def test_note_update_works(self):
-    #     response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
-    #     self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
-    #                                        'tag': [self.tag], 'iv': 'random',
-    #                                        'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-    #                                        'created_at': '2012-01-14T00:00:00Z',
-    #                                        'updated_at': '2012-01-14T00:00:00Z'})
+
+    @freeze_time("2012-01-14")
+    def test_note_update_works(self):
+        response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
+        self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
+                                           'tag': [self.tag], 'iv': 'random',
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                                           'created_at': '2012-01-14T00:00:00Z',
+                                           'updated_at': '2012-01-14T00:00:00Z'})
     #
     # @freeze_time("2012-01-14")
     # def test_new_note_creation_works(self):
