@@ -1,5 +1,5 @@
 from django.test import TestCase, TransactionTestCase
-from .models import Tag, Notes, Diary, Secret
+from .models import Notes, Diary, Secret
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, APIClient
 from django.contrib.auth.models import User
@@ -14,17 +14,10 @@ class ModelTest(TransactionTestCase):
     reset_sequences = True
 
     def setUp(self):
-        tag = Tag.objects.create(name="Test tag")
+        tag = "Test tag"
         Notes.objects.create(tag=tag, content="test content ", date=self.current_date_time)
         Diary.objects.create(tag=tag, title="Hello title", content="test content", date=self.current_date_time)
         Secret.objects.create(key="blah blah bunny")
-
-    def test_tag_model(self):
-        tag_item = Tag.objects.all()
-        self.assertEqual(tag_item.count(), 1)
-
-        tag_result = Tag.objects.get(name="Test tag")
-        self.assertEqual(tag_result.name, "Test tag")
 
     def test_notes_model(self):
         note_item = Notes.objects.all()
@@ -72,76 +65,6 @@ class AuthTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class UserViewTest(TransactionTestCase):
-    """
-    Test User View
-    """
-    reset_sequences = True
-
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
-
-    def test_login_works(self):
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/users/')
-        self.assertEqual(response.status_code, 200)
-
-        self.client.logout()
-        response = self.client.get('/api/users/')
-        self.assertEqual(response.status_code, 403)
-
-    def test_get_correct_user(self):
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/users/')
-        self.assertEqual(response.json(), [{'email': 'a@b.com', 'id': 1, 'username': 'hiren'}])
-
-
-class TagViewTest(TransactionTestCase):
-    """
-        Test Tag View
-    """
-    reset_sequences = True
-    current_date_time = timezone.now()
-
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
-        self.client.force_authenticate(user=self.user)
-        self.tag = Tag.objects.create(name="Test tag")
-        Diary.objects.create(tag=self.tag, title="Hello title", content="test content", date=self.current_date_time)
-
-
-    def test_login_works(self):
-        response = self.client.get('/api/tags/')
-        self.assertEqual(response.status_code, 200)
-
-        self.client.logout()
-        response = self.client.get('/api/tags/')
-        self.assertEqual(response.status_code, 403)
-
-    def test_return_correct_tag(self):
-        response = self.client.get('/api/tags/1/')
-        self.assertEqual(response.json(), {'name': 'Test tag', 'id': 1})
-
-    def test_tag_update_works(self):
-        response = self.client.patch('/api/tags/1/', data={'name': 'Updated tag'})
-        self.assertEqual(response.json(), {'name': 'Updated tag', 'id': 1})
-
-    def test_new_tag_creation_works(self):
-        response = self.client.post('/api/tags/', data={'name': 'Updated tag'})
-        self.assertEqual(response.json(), {'name': 'Updated tag', 'id': 2})
-
-    def test_deleting_tag_works(self):
-        self.client.post('/api/tags/', data={'name': 'New tag'})
-        response = self.client.delete('/api/tags/2/')
-        self.assertEqual(response.status_code, 204)
-
-    def test_tag_cloud_works(self):
-        response = self.client.get('/api/tags/cloud/')
-        self.assertEqual(response.json(), {'Test tag': 1})
-
-
 class NotesViewTest(TransactionTestCase):
     """
         Test Notes View
@@ -153,7 +76,7 @@ class NotesViewTest(TransactionTestCase):
         self.client = APIClient()
         self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
         self.client.force_authenticate(user=self.user)
-        self.tag = Tag.objects.create(name="Test tag")
+        self.tag = "Test tag"
         Notes.objects.create(tag=self.tag, content="test content", date=self.current_date_time)
 
     def test_login_works(self):
@@ -198,7 +121,7 @@ class DiaryViewTest(TransactionTestCase):
         self.client = APIClient()
         self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
         self.client.force_authenticate(user=self.user)
-        self.tag = Tag.objects.create(name="Test tag")
+        self.tag = "Test tag"
         Diary.objects.create(tag=self.tag, title="Hello title", content="test content", date=self.current_date_time)
 
     def test_login_works(self):
@@ -230,51 +153,3 @@ class DiaryViewTest(TransactionTestCase):
                                               'date': self.current_date_time, 'title': 'Delete me :D '})
         response = self.client.delete('/api/diary/2/')
         self.assertEqual(response.status_code, 204)
-
-
-class SecretViewTest(TransactionTestCase):
-    """
-    Test Secret View
-    """
-    reset_sequences = True
-
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
-        self.client.force_authenticate(user=self.user)
-
-    def test_login_works(self):
-        response = self.client.get('/api/secret/')
-        self.assertEqual(response.status_code, 404)
-
-        self.client.logout()
-        response = self.client.get('/api/secret/')
-        self.assertEqual(response.status_code, 403)
-
-    def test_return_correct_secret_object(self):
-        Secret.objects.create(key="secret key")
-        response = self.client.get('/api/secret/')
-        self.assertEqual(response.json(), [{'id': 1, 'key': 'secret key'}])
-
-    def test_deleting_secret_object_fail(self):
-        Secret.objects.create(key="secret key")
-        response = self.client.delete('/api/secret/1/')
-        self.assertEqual(response.status_code, 403)
-
-    def test_creating_second_object_fail(self):
-        Secret.objects.create(key="secret key")
-        response = self.client.post('/api/secret/', data={'key': "bunny"})
-        self.assertEqual(response.status_code, 403)
-
-    def test_secret_key_update_works(self):
-        Secret.objects.create(key="secret key")
-        response = self.client.patch('/api/secret/1/', data={'key': 'new key'})
-        self.assertEqual(response.json(), {'id': 1, 'key': 'new key'})
-
-    def test_return_404_on_empty_database(self):
-        response = self.client.get('/api/secret/')
-        self.assertEqual(response.status_code, 404)
-
-    def test_key_creation_works(self):
-        response = self.client.post('/api/secret/', data={'key': 'bunny'})
-        self.assertEqual(response.status_code, 201)
