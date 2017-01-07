@@ -11,7 +11,9 @@ class NotesSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DiarySerializer(serializers.ModelSerializer):
+class DiarySerializer(TaggitSerializer, serializers.ModelSerializer):
+    tag = TagListSerializerField()
+    
     class Meta:
         model = Diary
         fields = '__all__'
