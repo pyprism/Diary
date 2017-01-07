@@ -3,6 +3,7 @@ from .models import Notes, Diary
 from django.utils import timezone
 from rest_framework.test import APIRequestFactory, APIClient
 from django.contrib.auth.models import User
+from freezegun import freeze_time
 from rest_framework_jwt.views import obtain_jwt_token
 
 
@@ -64,49 +65,61 @@ class ModelTest(TransactionTestCase):
 #         self.assertEqual(response.status_code, 200)
 
 
-# class NotesViewTest(TransactionTestCase):
-#     """
-#         Test Notes View
-#     """
-#     reset_sequences = True
-#     current_date_time = timezone.now()
-#
-#     def setUp(self):
-#         self.client = APIClient()
-#         self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
-#         self.client.force_authenticate(user=self.user)
-#         self.tag = "Test tag"
-#         Notes.objects.create(tag=self.tag, content="test content", date=self.current_date_time)
-#
-#     def test_login_works(self):
-#         response = self.client.get('/api/notes/')
-#         self.assertEqual(response.status_code, 200)
-#
-#         self.client.logout()
-#         response = self.client.get('/api/notes/')
-#         self.assertEqual(response.status_code, 403)
-#
-#     def test_return_correct_note(self):
-#         response = self.client.get('/api/notes/1/')
-#         self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
-#                                            'tag': 1, 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
-#
-#     def test_note_update_works(self):
-#         response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
-#         self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
-#                                            'tag': 1, 'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
-#
-#     def test_new_note_creation_works(self):
-#         response = self.client.post('/api/notes/', data={'tag': self.tag.id, 'content': "New content",
-#                                                          'date': self.current_date_time})
-#         self.assertEqual(response.json(), {'id': 2, 'tag': self.tag.id, 'content': "New content",
-#                                            'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')})
-#
-#     def test_deleting_note_works(self):
-#         self.client.post('/api/notes/', data={'tag': self.tag.id, 'content': "New content !",
-#                                               'date': self.current_date_time})
-#         response = self.client.delete('/api/notes/2/')
-#         self.assertEqual(response.status_code, 204)
+class NotesViewTest(TransactionTestCase):
+    """
+        Test Notes View
+    """
+    reset_sequences = True
+    current_date_time = timezone.now()
+
+    @freeze_time("2012-01-14")
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('hiren', 'a@b.com', 'password')
+        self.client.force_authenticate(user=self.user)
+        self.tag = "Test tag"
+        note = Notes.objects.create(iv="random", content="test content", date=self.current_date_time)
+        note.tag.add(self.tag)
+
+    def test_login_works(self):
+        response = self.client.get('/api/notes/')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.logout()
+        response = self.client.get('/api/notes/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_return_correct_note(self):
+        response = self.client.get('/api/notes/1/')
+        self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
+                                           'tag': [self.tag], 'iv': "random",
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                                           'created_at': '2012-01-14T00:00:00Z',
+                                           'updated_at': '2012-01-14T00:00:00Z'})
+    #
+    # @freeze_time("2012-01-14")
+    # def test_note_update_works(self):
+    #     response = self.client.patch('/api/notes/1/', data={'content': 'Updated content'})
+    #     self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
+    #                                        'tag': [self.tag], 'iv': 'random',
+    #                                        'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+    #                                        'created_at': '2012-01-14T00:00:00Z',
+    #                                        'updated_at': '2012-01-14T00:00:00Z'})
+    #
+    # @freeze_time("2012-01-14")
+    # def test_new_note_creation_works(self):
+    #     response = self.client.post('/api/notes/', data={'tag': list(self.tag), 'iv': 'random', 'content': "New content",
+    #                                                      'date': self.current_date_time})
+    #     self.assertEqual(response.json(), {'id': 2, 'tag': self.tag, 'iv': 'random', 'content': "New content",
+    #                                        'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+    #                                        'created_at': '2012-01-14T00:00:00Z',
+    #                                        'updated_at': '2012-01-14T00:00:00Z'})
+    #
+    # def test_deleting_note_works(self):
+    #     #self.client.post('/api/notes/', data={'tag': [self.tag], 'iv': 'random', 'content': "New content !",
+    #     #                                      'date': self.current_date_time})
+    #     response = self.client.delete('/api/notes/1/')
+    #     self.assertEqual(response.status_code, 204)
 #
 #
 # class DiaryViewTest(TransactionTestCase):
