@@ -5,6 +5,7 @@ from taggit.managers import TaggableManager
 class Diary(models.Model):
     title = models.CharField(max_length=500)
     content = models.TextField()
+    iv = models.CharField(max_length=500)
     date = models.DateTimeField()
     tag = TaggableManager()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -13,6 +14,7 @@ class Diary(models.Model):
 
 class Notes(models.Model):
     content = models.TextField()
+    iv = models.CharField(max_length=500)
     date = models.DateTimeField()
     tag = TaggableManager()
     created_at = models.DateTimeField(auto_now_add=True)
