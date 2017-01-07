@@ -1,77 +1,121 @@
-body  {
-    background-color: #333333;
-    font-family: "Open Sans", Helvetica, sans-serif;
+* {
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
-
-.login form {
-    text-align: center;
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: url(../img/sativa.png) repeat fixed;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 200;
 }
-
-.login label {
-    display: block;
-    letter-spacing: 4px;
-    padding-top: 30px;
-    text-align: center;
+.login {
+  position: relative;
+  top: 50%;
+  width: 250px;
+  display: table;
+  margin: -150px auto 0 auto;
+  background: #fff;
+  border-radius: 4px;
 }
-.login label .label-text {
-    color: #9B9B9B;
-    cursor: text;
-    font-size: 20px;
-    line-height: 20px;
-    text-transform: uppercase;
-    -moz-transform: translateY(-34px);
-    -ms-transform: translateY(-34px);
-    -webkit-transform: translateY(-34px);
-    transform: translateY(-34px);
-    transition: all 0.3s;
+.legend {
+  position: relative;
+  width: 100%;
+  display: block;
+  background: #FF7052;
+  padding: 15px;
+  color: #fff;
+  font-size: 20px;
 }
-.login label input {
-    background-color: transparent;
-    border: 0;
-    border-bottom: 2px solid #4A4A4A;
-    color: white;
-    font-size: 36px;
-    letter-spacing: -1px;
-    outline: 0;
-    padding: 5px 20px;
-    text-align: center;
-    transition: all 0.3s;
-    width: 200px;
+.legend:after {
+  content: "";
+  background-image: url(../img/multy-user.png);
+  background-size: 100px 100px;
+  background-repeat: no-repeat;
+  background-position: 152px -16px;
+  opacity: 0.06;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
 }
-.login label input:focus {
-    max-width: 100%;
-    width: 400px;
+.input {
+  position: relative;
+  width: 90%;
+  margin: 15px auto;
 }
-.login label input:focus + .label-text {
-    color: #F0F0F0;
-    font-size: 13px;
-    -moz-transform: translateY(-74px);
-    -ms-transform: translateY(-74px);
-    -webkit-transform: translateY(-74px);
-    transform: translateY(-74px);
+.input span {
+  position: absolute;
+  display: block;
+  color: #d4d4d4;
+  left: 10px;
+  top: 8px;
+  font-size: 20px;
 }
-.login label input:valid + .label-text {
-    font-size: 13px;
-    -moz-transform: translateY(-74px);
-    -ms-transform: translateY(-74px);
-    -webkit-transform: translateY(-74px);
-    transform: translateY(-74px);
+.input input {
+  width: 100%;
+  padding: 10px 5px 10px 40px;
+  display: block;
+  border: 1px solid #EDEDED;
+  border-radius: 4px;
+  transition: 0.2s ease-out;
+  color: #a1a1a1;
 }
-
-.login button {
-    background-color: #333333;
-    border: 2px solid white;
-    border-radius: 27px;
-    color: white;
-    cursor: pointer;
-    font-size: 20px;
-    margin-top: 20px;
-    padding: 15px 30px;
-    text-transform: uppercase;
-    transition: all 200ms;
+.input input:focus {
+  padding: 10px 5px 10px 10px;
+  outline: 0;
+  border-color: #FF7052;
 }
-.login button:hover, button:focus {
-    background-color: white;
-    color: #333333;
-    outline: 0;
+.submit {
+  width: 45px;
+  height: 45px;
+  display: block;
+  margin: 0 auto -15px auto;
+  background: #fff;
+  border-radius: 100%;
+  border: 1px solid #FF7052;
+  color: #FF7052;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px 7px #fff;
+  transition: 0.2s ease-out;
+}
+.submit:hover,
+.submit:focus {
+  background: #FF7052;
+  color: #fff;
+  outline: 0;
+}
+.feedback {
+  position: absolute;
+  bottom: -70px;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  background: #2ecc71;
+  padding: 10px 0;
+  font-size: 12px;
+  display: none;
+  opacity: 0;
+}
+.feedback:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: "";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(46, 204, 113, 0);
+  border-bottom-color: #2ecc71;
+  border-width: 10px;
+  margin-left: -10px;
 }
