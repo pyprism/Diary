@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'diary',
     'webpack_loader',
     'taggit',
-    'django_extensions',
+    'taggit_serializer',
 ]
 
 MIDDLEWARE = [
