@@ -6,10 +6,12 @@ django-taggit-serializer==0.1.5
 django-webpack-loader==0.4.1
 djangorestframework==3.5.3
 djangorestframework-jwt==1.9.0
+freezegun==0.3.8
 itypes==1.1.0
 openapi-codec==1.2.1
 psycopg2==2.6.2
 PyJWT==1.4.2
+python-dateutil==2.6.0
 requests==2.12.4
 simplejson==3.10.0
 six==1.10.0
