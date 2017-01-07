@@ -1,18 +1,14 @@
 from rest_framework import serializers
 from .models import Diary, Notes
+from taggit_serializer.serializers import TagListSerializerField, TaggitSerializer
 
 
-class NotesSerializer(serializers.ModelSerializer):
+class NotesSerializer(TaggitSerializer, serializers.ModelSerializer):
+    tag = TagListSerializerField()
+
     class Meta:
         model = Notes
         fields = '__all__'
-
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     tags = validated_data.pop('tag')
-    #     hiren = Notes.objects.create(**validated_data)
-    #     hiren.tag.add(**tags)
-    #     return hiren
 
 
 class DiarySerializer(serializers.ModelSerializer):
