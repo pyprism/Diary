@@ -8,11 +8,9 @@ from .models import Diary, Notes
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.mixins import ListModelMixin
-from django.core import serializers
 
 
-class NotesViewset(viewsets.ModelViewSet, ListModelMixin):
+class NotesViewset(viewsets.ModelViewSet):
     """
         API endpoint that allows notes to be created, viewed ,edited and deleted.
     """
