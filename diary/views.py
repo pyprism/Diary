@@ -21,17 +21,6 @@ class NotesViewset(viewsets.ModelViewSet, ListModelMixin):
     queryset = Notes.objects.all()
     serializer_class = NotesSerializer
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        if 'tags' in self.request.data:
-            instance.tag.set(*self.request.data['tags'])
-
-    def list(self, request, *args, **kwargs):
-        notes = Notes.objects.all()
-        data = serializers.serialize('json', notes)
-        content = {'hiren': data}
-        return Response(content)
-
 
 class DiaryViewset(viewsets.ModelViewSet):
     """
