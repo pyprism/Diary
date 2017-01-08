@@ -2,9 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 import Login from './components/Login.jsx';
-import Dashboard from './components/Dashboard.jsx';
+import Post from './components/Dashboard.jsx';
 import Main from './components/Main.jsx';
+import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
+import Notes from './components/Notes.jsx';
 import axios from 'axios';
 //import { Movies } from './models/Movies.jsx';
 
@@ -18,10 +20,9 @@ function authRequired(nextState, replace) {
                 'token': token
             }
         }).then(function (res) {
-            console.log();
+
         }).catch(function(response) {
             replace('/');
-            console.log(response);
             sweetAlert("Oops!", 'Token Expired', "info");
         });
     } else {
@@ -34,10 +35,12 @@ function authRequired(nextState, replace) {
 ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login} />
-        <Route path="/dashboard" onEnter={authRequired} movie={ new Movies() } component={Main}>
-            <IndexRoute movie={ new Movies() } component={Dashboard}/>
-            <Route path="stats" component={Dashboard} />
-            <Route path="movie" component={Movie} />
+        <Route path="/secret" component={Secret} />
+        <Route path="/dashboard" onEnter={authRequired} component={Main}>
+            <IndexRoute component={Post}/>
+            <Route path="posts" component={Post} />
+            <Route path="new" component={Form} />
+            <Route path="notes" component={Notes} />
         </Route>
 
     </Router>,
