@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 import Login from './components/Login.jsx';
-import Post from './components/Dashboard.jsx';
+import Posts from './components/Posts.jsx';
 import Main from './components/Main.jsx';
 import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
@@ -37,8 +37,8 @@ ReactDOM.render(
         <Route path="/" component={Login} />
         <Route path="/secret" component={Secret} />
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
-            <IndexRoute component={Post}/>
-            <Route path="posts" component={Post} />
+            <IndexRoute component={Posts}/>
+            <Route path="posts" component={Posts} />
             <Route path="new" component={Form} />
             <Route path="notes" component={Notes} />
         </Route>
