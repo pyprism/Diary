@@ -3,11 +3,13 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .serializers import NotesSerializer, DiarySerializer
+from .serializers import NotesSerializer, DiarySerializer, TagsListSerializer
 from .models import Diary, Notes
 from rest_framework.decorators import list_route
 from rest_framework.response import Response
 from rest_framework import status
+from taggit.models import Tag
+from rest_framework.generics import ListAPIView
 
 
 class NotesViewset(viewsets.ModelViewSet):
@@ -28,3 +30,13 @@ class DiaryViewset(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Diary.objects.all()
     serializer_class = DiarySerializer
+
+
+class TagsListView(ListAPIView):
+    """
+    API endpoint that return list of tags
+    """
+    queryset = Tag.objects.all()
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication, BasicAuthentication, JSONWebTokenAuthentication)
+    serializer_class = TagsListSerializer
