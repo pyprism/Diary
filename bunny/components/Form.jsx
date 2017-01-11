@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import Helmet from "react-helmet";
 import axios from 'axios';
 import { browserHistory } from 'react-router';
+import {Crypt} from '../utils/Crypt';
 
 
 export default class Form extends React.Component {
@@ -12,54 +13,87 @@ export default class Form extends React.Component {
          * Handle ajax
          */
         e.preventDefault();
-        console.log(ReactDOM.findDOMNode(this.refs.content).value);
-        /* axios({
-         method: 'post',
-         url: '/api/movies/',
-         data: {
-         'movie' : {
-         'name': ReactDOM.findDOMNode(this.refs.name).value,
-         'imdb_rating': ReactDOM.findDOMNode(this.refs.imdb_rating).value,
-         'movie_type': ReactDOM.findDOMNode(this.refs.movie_type).value
-         },
-         'rating': ReactDOM.findDOMNode(this.refs.rating).value,
-         'source': ReactDOM.findDOMNode(this.refs.source).value,
-         'video_quality': ReactDOM.findDOMNode(this.refs.video_quality).value,
-         'watched_at': ReactDOM.findDOMNode(this.refs.watched_at).value,
-         'watched_full': ReactDOM.findDOMNode(this.refs.watched_full).value
-         },
-         headers: {
-         'Authorization': "JWT " + sessionStorage.getItem('token')
-         }
-         }).then(function (response) {
-         if(response.statusText === "Created") {
-         sweetAlert("Saved", "New Movie Saved Successfully", "info");
-         browserHistory.push('/dashboard/');
-         }
-         }).catch(function (error) {
-         console.error(error);
-         sweetAlert('Error', 'Check console!', 'error');
-         })*/
+        let _url = this.postType() ? '/api/movies/' : '/api/notes/';
+        let random = Math.random().toString(36).substr(2, 5);
+        axios({
+            method: 'post',
+            url: _url,
+            data: {
+                'tag' : [ReactDOM.findDOMNode(this.refs.tag).value],
+                'title': ReactDOM.findDOMNode(this.refs.title).value,
+                'content': ReactDOM.findDOMNode(this.refs.content).value,
+                'iv': random,
+                'date': ReactDOM.findDOMNode(this.refs.date).value
+            },
+            headers: {
+                'Authorization': "JWT " + sessionStorage.getItem('token')
+            }
+        }).then(function (response) {
+            if(response.statusText === "Created") {
+                sweetAlert("Saved", "New Movie Saved Successfully", "info");
+                browserHistory.push('/dashboard/');
+            }
+        }).catch(function (error) {
+            console.error(error);
+            sweetAlert('Error', 'Check console!', 'error');
+        })
     }
-
+    
     postType(e) {
-        if(e.target.value == 'note')
+        if(e.target.value == 'note') {
             $('#title').hide();
-        else if (e.target.value == 'diary')
+            return false;
+        }
+        else if (e.target.value == 'diary') {
             $('#title').show();
+            return true;
+        }
     }
 
     componentDidMount() {
-        $('#summernote').summernote({
+        $('#summernote').summernote({  // initializer for summernote
             height: 150
         });
 
 
-        $('#datetimepicker').datetimepicker({
+        $('#datetimepicker').datetimepicker({  // initializer for datetimepicker
             format: 'Y-mm-D H:mm:ss'
         });
 
+        (function () { // function for selectize
+            axios.get('/api/tags/', {
+                headers: {'Authorization': "JWT " + sessionStorage.getItem('token')}
+            }).then(function (response) {
+                let nisha = [];
+                response.data.map(function (hiren) {
+                    let bunny = {'value': '', 'text': ''};
+                    bunny['value'] = hiren.name;
+                    bunny['text'] = hiren.name;
+                    nisha.push(bunny);
+                });
+                $('#tags').selectize({
+                    delimiter: ', ',
+                    persist: false,
+                    options: nisha,
+                    create: function(input) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                })
+            }).catch(function (error) {
+                console.error(error);
+            })
+        })();
 
+        var cipher = forge.cipher.createCipher('AES-CBC', this.stringToBytes('s'));
+         cipher.start({iv: "sasdrsdffcdfasdfercf34rc3c3c"});
+         cipher.update(forge.util.createBuffer("Sasasasa"));
+         cipher.finish();
+         var encrypted = cipher.output;
+         console.log(encrypted);
+         console.log(encrypted.toHex());
     }
 
     render() {
@@ -103,10 +137,10 @@ export default class Form extends React.Component {
                                     </span>
                                 </div>
                             </div>
-                            <div className="form-group" id="title">
+                            <div className="form-group" >
                                 <label className="control-label col-sm-3">Tags</label>
                                 <div className="col-sm-9">
-                                    <input type="text" ref="tag" required className="form-control input-lg" />
+                                    <input type="text" ref="tag" id="tags" required className="form-control input-lg" />
                                 </div>
                             </div>
                             <div className="form-group">
