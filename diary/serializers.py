@@ -18,3 +18,7 @@ class DiarySerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Diary
         fields = '__all__'
 
+
+class TagsListSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100)
+
