@@ -121,6 +121,12 @@ export default class Form extends React.Component {
 
         return (
             <div >
+                <div className="row">
+                    <Helmet
+                        title="Hiren-Diary: Form"
+                    />
+                </div>
+
                 <form className="form-horizontal">
                     <div className="form-group">
                         <label className="control-label col-sm-2">Post Type</label>
