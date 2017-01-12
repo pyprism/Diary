@@ -10,53 +10,51 @@ export default class Form extends React.Component {
 
     form(e) {
         /***
-         * Handle ajax
+         * Handle post save
          */
         e.preventDefault();
-        let _url = this.postType() ? '/api/movies/' : '/api/notes/';
-        let random = Math.random().toString(36).substr(2, 5);
+        console.log(ReactDOM.findDOMNode(this.refs.tag).value);
+        if(ReactDOM.findDOMNode(this.refs.postType).value == 'note')
+            var _url = '/api/notes/';
+        else if(ReactDOM.findDOMNode(this.refs.postType).value == 'diary')
+            var _url = '/api/diary/';
+        let  random = forge.random.getBytesSync(16),
+            _salt = forge.random.getBytesSync(128),
+            key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'), _salt, 100, 16);
         axios({
             method: 'post',
             url: _url,
             data: {
                 'tag' : [ReactDOM.findDOMNode(this.refs.tag).value],
-                'title': ReactDOM.findDOMNode(this.refs.title).value,
-                'content': ReactDOM.findDOMNode(this.refs.content).value,
-                'iv': random,
+                'title': Crypt.encrypt(ReactDOM.findDOMNode(this.refs.title).value, key, random),
+                'content': Crypt.encrypt(ReactDOM.findDOMNode(this.refs.content).value, key, random),
+                'iv': forge.util.bytesToHex(random),
+                'salt': forge.util.bytesToHex(_salt),
                 'date': ReactDOM.findDOMNode(this.refs.date).value
             },
             headers: {
                 'Authorization': "JWT " + sessionStorage.getItem('token')
             }
         }).then(function (response) {
+            console.log(response);
             if(response.statusText === "Created") {
-                sweetAlert("Saved", "New Movie Saved Successfully", "info");
-                browserHistory.push('/dashboard/');
+                sweetAlert("Saved", "Saved Successfully", "success");
+                //browserHistory.push('/dashboard/');
             }
         }).catch(function (error) {
+            if(error.statusText === 'Forbidden') {
+                sweetAlert("Oops!", 'Token Expired, Log Out Plz !', "error");
+            }
             console.error(error);
             sweetAlert('Error', 'Check console!', 'error');
         })
     }
 
     postType(e) {
-        if(e.target.value == 'note') {
+        if(e.target.value == 'note')
             $('#title').hide();
-            return false;
-        }
-        else if (e.target.value == 'diary') {
+        else if (e.target.value == 'diary')
             $('#title').show();
-            return true;
-        }
-    }
-
-    str2ab(str) {
-        var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-        var bufView = new Uint16Array(buf);
-        for (var i=0, strLen=str.length; i<strLen; i++) {
-            bufView[i] = str.charCodeAt(i);
-        }
-        return buf;
     }
 
     componentDidMount() {
@@ -66,7 +64,7 @@ export default class Form extends React.Component {
 
 
         $('#datetimepicker').datetimepicker({  // initializer for datetimepicker
-            format: 'Y-mm-D H:mm:ss'
+            format: 'YYYY-MM-D H:mm:ss'
         });
 
         (function () { // function for selectize
@@ -81,7 +79,7 @@ export default class Form extends React.Component {
                     nisha.push(bunny);
                 });
                 $('#tags').selectize({
-                    delimiter: ', ',
+                    delimiter: ' ',
                     persist: false,
                     options: nisha,
                     create: function(input) {
@@ -127,11 +125,11 @@ export default class Form extends React.Component {
                     />
                 </div>
 
-                <form className="form-horizontal">
+                <form className="form-horizontal" onSubmit={this.form.bind(this)}>
                     <div className="form-group">
                         <label className="control-label col-sm-2">Post Type</label>
                         <div className="col-sm-10">
-                            <select className="form-control " onChange={this.postType.bind(this)} required>
+                            <select className="form-control " ref="postType" onChange={this.postType.bind(this)} required>
                                 <option value="diary">Diary</option>
                                 <option value="note">Note</option>
                             </select>
