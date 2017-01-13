@@ -46,7 +46,7 @@ export default class Form extends React.Component {
                 sweetAlert("Oops!", 'Token Expired, Log Out Plz !', "error");
             }
             console.error(error);
-            sweetAlert('Error', 'Check console!', 'error');
+            sweetAlert('Error', error.statusText, 'error');
         })
     }
 
