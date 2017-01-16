@@ -13,19 +13,42 @@ export default class Form extends React.Component {
          * Handle post save
          */
         e.preventDefault();
-        console.log(ReactDOM.findDOMNode(this.refs.tag).value);
+
+        // detect post type
         if(ReactDOM.findDOMNode(this.refs.postType).value == 'note')
             var _url = '/api/notes/';
         else if(ReactDOM.findDOMNode(this.refs.postType).value == 'diary')
             var _url = '/api/diary/';
+
+        // key, salt generation
         let  random = forge.random.getBytesSync(16),
             _salt = forge.random.getBytesSync(128),
             key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'), _salt, 100, 16);
+
+        // input tag string manipulation for django-taggit format
+        var tagStr = ReactDOM.findDOMNode(this.refs.tag).value;
+        var _tag =[];
+        var len = tagStr.length;
+        var hiren;
+        var x = "";
+        for( hiren=0; hiren<len; hiren++) {
+            if(tagStr[hiren] != ";"){
+                x = x + tagStr[hiren];
+                if( hiren + 1 == len)
+                    _tag.push(x);
+            }
+            else{
+                _tag.push(x);
+                x = "";
+            }
+        }
+
+        // now the final part. clap clap ....  :D 
         axios({
             method: 'post',
             url: _url,
             data: {
-                'tag' : [ReactDOM.findDOMNode(this.refs.tag).value],
+                'tag' : _tag,
                 'title': Crypt.encrypt(ReactDOM.findDOMNode(this.refs.title).value, key, random),
                 'content': Crypt.encrypt(ReactDOM.findDOMNode(this.refs.content).value, key, random),
                 'iv': forge.util.bytesToHex(random),
@@ -79,7 +102,7 @@ export default class Form extends React.Component {
                     nisha.push(bunny);
                 });
                 $('#tags').selectize({
-                    delimiter: ' ',
+                    delimiter: ';',
                     persist: false,
                     options: nisha,
                     create: function(input) {
