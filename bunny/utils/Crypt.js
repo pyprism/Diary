@@ -13,8 +13,12 @@ export default class Crypt {
     }
 
     static decrypt(encryptedHex, key, iv) {
-        var decipher = forge.cipher.createDecipher('AES-CBC', key);
-        decipher.start({iv: iv});
+        try {
+            var decipher = forge.cipher.createDecipher('AES-CBC', key);
+        } catch (e) {
+            sweetAlert("Error", "Secret key is not valid!", "error");
+        }
+        decipher.start({iv: forge.util.hexToBytes(iv)});
         decipher.update(forge.util.hexToBytes(encryptedHex));
         decipher.finish();
         return decipher.output.data;
