@@ -8,7 +8,7 @@ import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
 import Notes from './components/Notes.jsx';
 import axios from 'axios';
-//import { Movies } from './models/Movies.jsx';
+import { Diary } from './models/Diary.jsx';
 
 function authRequired(nextState, replace) {
     let token = sessionStorage.getItem('token');
@@ -37,8 +37,8 @@ ReactDOM.render(
         <Route path="/" component={Login} />
         <Route path="/secret" component={Secret} />
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
-            <IndexRoute component={Posts}/>
-            <Route path="posts" component={Posts} />
+            <IndexRoute posts={ new Diary() } component={Posts}/>
+            <Route path="posts" posts={ new Diary() } component={Posts} />
             <Route path="new" component={Form} />
             <Route path="notes" component={Notes} />
         </Route>
