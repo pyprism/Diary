@@ -19,7 +19,7 @@ export default class Crypt {
             sweetAlert("Error", "Secret key is not valid!", "error");
         }
         decipher.start({iv: forge.util.hexToBytes(iv)});
-        decipher.update(forge.util.hexToBytes(encryptedHex));
+        decipher.update(forge.util.createBuffer(forge.util.hexToBytes(encryptedHex)));
         decipher.finish();
         return decipher.output.data;
     }
