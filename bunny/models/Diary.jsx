@@ -19,13 +19,12 @@ export class Diary {
                     forge.util.hexToBytes(post['salt']), 100, 16);
                 let hiren = [];
                 hiren['id'] = post['id'];
-                //hiren['title'] = Crypt.decrypt(post['title'], key, post['iv']);
-                hiren['content'] = post['content'];
+                hiren['title'] = Crypt.decrypt(post['title'], key, post['iv']);
+                hiren['content'] = Crypt.decrypt(post['content'], key, post['iv']);
                 hiren['tag'] = post['tag'];
                 hiren['date'] = moment.utc(post['date']).local().format("dddd, DD MMMM YYYY hh:mm:ss A");
-                //this.posts.push.apply(this.posts, hiren);
-            });
-            //this.posts.push.apply(this.posts, response.data);
+                this.posts.push.apply(this.posts, hiren);
+            }.bind(this));
             this.loaded = true;
         })).catch(function(err) {
             console.error(err);
@@ -33,7 +32,7 @@ export class Diary {
         });
     }
 
-    @computed get postData() {
+    @computed get Data() {
         return this.posts;
     }
 }
