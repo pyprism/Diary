@@ -2,6 +2,9 @@
  * Created by prism on 1/11/17.
  */
 
+import { browserHistory } from 'react-router';
+import {Diary} from '../models/Diary.jsx';
+
 export default class Crypt {
     static encrypt(text, key, iv) {
         var cipher = forge.cipher.createCipher('AES-CBC', key);
@@ -13,14 +16,16 @@ export default class Crypt {
     }
 
     static decrypt(encryptedHex, key, iv) {
-        try {
-            var decipher = forge.cipher.createDecipher('AES-CBC', key);
-        } catch (e) {
-            sweetAlert("Error", "Secret key is not valid!", "error");
-        }
+        var decipher = forge.cipher.createDecipher('AES-CBC', key);
         decipher.start({iv: forge.util.hexToBytes(iv)});
         decipher.update(forge.util.createBuffer(forge.util.hexToBytes(encryptedHex)));
-        decipher.finish();
+        let bunny = decipher.finish();
+        if(!bunny) {
+            let dir = new Diary();
+            dir.posts = [];
+            browserHistory.push('/secret');
+            sweetAlert("Error", "Secret key is not valid!", "error");
+        }
         return decipher.output.data;
     }
 }
