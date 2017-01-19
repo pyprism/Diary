@@ -39,7 +39,7 @@ export default class Login extends React.Component {
             />
 
             <form id="loginform"  onSubmit={this.login.bind(this)} >
-                <input type="text" required className="input" placeholder="Username" ref="username" />
+                <input type="text" required className="input" autoFocus placeholder="Username" ref="username" />
                 <input type="password" required className="input" placeholder="Password" ref="password" />
                 <input type="submit" className="loginbutton" value="SIGN IN" />
             </form>
