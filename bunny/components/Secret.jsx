@@ -24,7 +24,7 @@ export default class Secret extends React.Component {
             />
 
             <form id="loginform"  onSubmit={this.secret.bind(this)} >
-                <input type="password" required className="input" placeholder="Secret Key" ref="secret" />
+                <input type="password" required className="input" autoFocus placeholder="Secret Key" ref="secret" />
                 <input type="submit" className="loginbutton" value="Proceed" />
             </form>
 
