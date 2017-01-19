@@ -1,9 +1,12 @@
 import { observable, action, computed, autorun } from 'mobx';
 import axios from 'axios';
 import Crypt from '../utils/Crypt';
+import { toJS } from "mobx";
+
 
 export class Diary {
     @observable loaded = false;
+    @observable searching = false;
     @observable posts = [];
     @observable loadingText = 'Loading from remote server....';
 
@@ -17,18 +20,20 @@ export class Diary {
             (response.data).map(function (post) {
                 let key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'),
                     forge.util.hexToBytes(post['salt']), 100, 16);
-                let hiren = [];
+                let hiren = {};
                 hiren['id'] = post['id'];
                 hiren['title'] = Crypt.decrypt(post['title'], key, post['iv']);
                 hiren['content'] = Crypt.decrypt(post['content'], key, post['iv']);
                 hiren['tag'] = post['tag'];
                 hiren['date'] = moment.utc(post['date']).local().format("dddd, DD MMMM YYYY hh:mm:ss A");
-                this.posts.push.apply(this.posts, hiren);
+                //console.log(hiren);
+                //this.posts.push.apply(this.posts, hiren);
+                this.posts.push(hiren);
             }.bind(this));
             this.loaded = true;
         })).catch(function(err) {
             console.error(err);
-          sweetAlert("Oops!", err.statusText, "error");
+            sweetAlert("Oops!", err.statusText, "error");
         });
     }
 
