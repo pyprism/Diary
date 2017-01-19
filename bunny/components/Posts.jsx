@@ -16,13 +16,12 @@ export default class Posts extends React.Component {
 
     hiren() {
         var bunny = [];
-        //console.dir(toJs(this.props.route.posts.posts));
         (this.props.route.posts.posts).map(function (data) {
             bunny.push(
-                <div className="post-preview">
-                    <a href="post.html">
+                <div className="post-preview" key={ data.id }>
+                    <a href={data.id}>
                         <h2 className="post-title">
-                            {data.content}
+                            {data.title}
                         </h2>
                     </a>
                     <p className="post-meta">Posted on {data.date}</p>
@@ -30,7 +29,7 @@ export default class Posts extends React.Component {
             )
         });
         return (
-            <div> saa </div>
+            <div> {bunny} </div>
         );
     }
 
