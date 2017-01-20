@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 import Login from './components/Login.jsx';
 import Posts from './components/Posts.jsx';
+import Post from './components/Post.jsx';
 import Main from './components/Main.jsx';
 import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
@@ -39,6 +40,7 @@ ReactDOM.render(
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
             <IndexRoute posts={ new Diary() } component={Posts}/>
             <Route path="posts" posts={ new Diary() } component={Posts} />
+            <Route path="posts/:id" posts={ new Diary() } component={Post} />
             <Route path="new" component={Form} />
             <Route path="notes" component={Notes} />
         </Route>
