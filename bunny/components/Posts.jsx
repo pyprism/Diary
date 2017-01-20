@@ -5,6 +5,7 @@ import axios from 'axios';
 import { toJS } from "mobx";
 import { browserHistory } from 'react-router';
 import { observer } from "mobx-react";
+import {Link} from 'react-router';
 
 
 @observer
@@ -19,11 +20,11 @@ export default class Posts extends React.Component {
         (this.props.route.posts.posts).map(function (data) {
             bunny.push(
                 <div className="post-preview" key={ data.id }>
-                    <a href={data.id}>
+                    <Link to={'/dashboard/posts/' + data.id + '/'}>
                         <h2 className="post-title">
                             {data.title}
                         </h2>
-                    </a>
+                    </Link>
                     <p className="post-meta">Posted on {data.date}</p>
                 </div>
             )
