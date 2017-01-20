@@ -32,15 +32,16 @@ function authRequired(nextState, replace) {
 
 }
 
+var diary = new Diary();
 
 ReactDOM.render(
     <Router history={browserHistory} >
         <Route path="/" component={Login} />
         <Route path="/secret" component={Secret} />
         <Route path="/dashboard" onEnter={authRequired} component={Main}>
-            <IndexRoute posts={ new Diary() } component={Posts}/>
-            <Route path="posts" posts={ new Diary() } component={Posts} />
-            <Route path="posts/:id" posts={ new Diary() } component={Post} />
+            <IndexRoute posts={ diary } component={Posts}/>
+            <Route path="posts" posts={ diary } component={Posts} />
+            <Route path="posts/:id/" posts={ diary } component={Post} />
             <Route path="new" component={Form} />
             <Route path="notes" component={Notes} />
         </Route>
