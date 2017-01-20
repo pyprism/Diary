@@ -8,7 +8,9 @@ export class Diary {
     @observable loaded = false;
     @observable searching = false;
     @observable posts = [];
+    @observable post = {} ;
     @observable loadingText = 'Loading from remote server....';
+    @observable pageId = 0;
 
     @action getPosts() {
         axios({
@@ -26,8 +28,6 @@ export class Diary {
                 hiren['content'] = Crypt.decrypt(post['content'], key, post['iv']);
                 hiren['tag'] = post['tag'];
                 hiren['date'] = moment.utc(post['date']).local().format("dddd, DD MMMM YYYY hh:mm:ss A");
-                //console.log(hiren);
-                //this.posts.push.apply(this.posts, hiren);
                 this.posts.push(hiren);
             }.bind(this));
             this.loaded = true;
@@ -48,10 +48,13 @@ export class Diary {
         return this.posts;
     }
 
-    findPostById(idz) {
-        this.posts.find(function(key){
-             return key.id === idz;
-        });
+    findMe(key) {
+        return key.id == this.pageId;
     }
+
+    @action findPostById() {
+        this.post =  toJS(this.posts).find(this.findMe.bind(this));
+    }
+
 
 }
