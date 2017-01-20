@@ -22,7 +22,7 @@ export default class Crypt {
         let bunny = decipher.finish();
         if(!bunny) {
             let dir = new Diary();
-            dir.posts = [];
+            dir.reset();
             browserHistory.push('/secret');
             sweetAlert("Error", "Secret key is not valid!", "error");
         }
