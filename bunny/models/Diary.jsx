@@ -37,7 +37,21 @@ export class Diary {
         });
     }
 
+    @action reset() {
+        this.loaded = false;
+        this.searching = false;
+        this.posts = [];
+        this.loadingText = 'Loading from remote server....';
+    }
+
     @computed get Data() {
         return this.posts;
     }
+
+    findPostById(idz) {
+        this.posts.find(function(key){
+             return key.id === idz;
+        });
+    }
+
 }
