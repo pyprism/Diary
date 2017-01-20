@@ -19,7 +19,7 @@ export default class Crypt {
         var decipher = forge.cipher.createDecipher('AES-CBC', key);
         decipher.start({iv: forge.util.hexToBytes(iv)});
         decipher.update(forge.util.createBuffer(forge.util.hexToBytes(encryptedHex)));
-        let bunny = decipher.finish();
+        let bunny = decipher.finish();  // if the secret key is invalid it returns false
         if(!bunny) {
             let dir = new Diary();
             dir.reset();
