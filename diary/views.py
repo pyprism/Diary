@@ -31,6 +31,9 @@ class DiaryViewset(viewsets.ModelViewSet):
     queryset = Diary.objects.all()
     serializer_class = DiarySerializer
 
+    def get_queryset(self):
+        return Diary.objects.all().order_by('-id')
+
 
 class TagsListView(ListAPIView):
     """
