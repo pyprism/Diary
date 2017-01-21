@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Diary(models.Model):
-    title = models.CharField(max_length=500)
+    title = models.TextField()
     content = models.TextField()
     iv = models.CharField(max_length=500)
     salt = models.CharField(max_length=1000)
