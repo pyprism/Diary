@@ -4,6 +4,7 @@ import {Router, Route, browserHistory, IndexRoute} from 'react-router';
 import Login from './components/Login.jsx';
 import Posts from './components/Posts.jsx';
 import Post from './components/Post.jsx';
+import PostEdit from './components/PostEdit.jsx';
 import Main from './components/Main.jsx';
 import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
@@ -42,6 +43,7 @@ ReactDOM.render(
             <IndexRoute posts={ diary } component={Posts}/>
             <Route path="posts" posts={ diary } component={Posts} />
             <Route path="posts/:id/" posts={ diary } component={Post} />
+            <Route path="posts/:id/edit" posts={ diary } component={PostEdit} />
             <Route path="new" component={Form} />
             <Route path="notes" component={Notes} />
         </Route>
