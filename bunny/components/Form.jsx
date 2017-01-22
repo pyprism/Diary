@@ -62,7 +62,7 @@ export default class Form extends React.Component {
             console.log(response);
             if(response.statusText === "Created") {
                 sweetAlert("Saved", "Saved Successfully", "success");
-                //browserHistory.push('/dashboard/');
+                browserHistory.push('/dashboard/posts/');
             }
         }).catch(function (error) {
             if(error.statusText === 'Forbidden') {
