@@ -20,14 +20,19 @@ export class Diary {
         }).then(action('response action', (response) => {
             this.loadingText = 'Decrypting data...';
             (response.data).map(function (post) {
+                let salt = forge.util.hexToBytes(post['salt']);
                 let key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'),
-                    forge.util.hexToBytes(post['salt']), 100, 16);
+                    salt, 100, 16);
                 let hiren = {};
                 hiren['id'] = post['id'];
                 hiren['title'] = Crypt.decrypt(post['title'], key, post['iv']);
                 hiren['content'] = Crypt.decrypt(post['content'], key, post['iv']);
                 hiren['tag'] = post['tag'];
                 hiren['date'] = moment.utc(post['date']).local().format("dddd, DD MMMM YYYY hh:mm:ss A");
+                hiren['rawDate'] = post['date'];
+                hiren['iv'] = post['iv'];
+                hiren['key'] = key;
+                hiren['salt'] = salt;
                 this.posts.push(hiren);
             }.bind(this));
             this.loaded = true;
