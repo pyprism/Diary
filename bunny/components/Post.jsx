@@ -32,7 +32,7 @@ export default class Post extends React.Component {
                         'Authorization': "JWT " + sessionStorage.getItem('token')
                     }
                 }).then(function (data) {
-                    sweetAlert("Saved", "Deleted Successfully", "success");
+                    sweetAlert("Deleted", "Deleted Successfully", "success");
                     browserHistory.push('/dashboard/posts/');
                 }).catch(function (error) {
                     sweetAlert("Warning", "Error in deletion", "error");
@@ -52,9 +52,12 @@ export default class Post extends React.Component {
                 )
             });
             return (
-                <div> {bunny} <Link className="btn btn-info"
+                <div> Tags: {bunny}
+                    <hr/>
+                    <Link className="btn btn-info"
                                     to={'/dashboard/posts/' + this.props.route.posts.pageId + '/edit/'}
                                     role="button">Edit</Link>
+
                     <button className="btn btn-danger" data-toggle="confirmation" onClick={this.deletePost()
                     }>Delete</button>
                 </div>
@@ -63,7 +66,7 @@ export default class Post extends React.Component {
     }
 
     render() {
-        var _title = this.props.route.posts.post['title'];
+        var _title = 'Hiren-Diary: ' + this.props.route.posts.post['title'];
 
         return (
             <div className="posts">
