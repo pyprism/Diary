@@ -15,11 +15,10 @@ export default class Posts extends React.Component {
         this.props.route.posts.getPosts();
     }
 
-    hiren() {
-        var bunny = [];
-        (this.props.route.posts.posts).map(function (data) {
-            bunny.push(
-                <div className="post-preview" key={ data.id }>
+    hiren() { // post's title list
+        return (this.props.route.posts.posts).map((data, index) => {
+            return (
+                <div className="post-preview" key={ index }>
                     <Link to={'/dashboard/posts/' + data.id + '/'}>
                         <h2 className="post-title">
                             {data.title}
@@ -29,9 +28,6 @@ export default class Posts extends React.Component {
                 </div>
             )
         });
-        return (
-            <div> {bunny} </div>
-        );
     }
 
     render() {
