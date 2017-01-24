@@ -59,7 +59,6 @@ export default class Form extends React.Component {
                 'Authorization': "JWT " + sessionStorage.getItem('token')
             }
         }).then(function (response) {
-            console.log(response);
             if(response.statusText === "Created") {
                 sweetAlert("Saved", "Saved Successfully", "success");
                 browserHistory.push('/dashboard/posts/');
