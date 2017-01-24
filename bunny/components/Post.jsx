@@ -44,9 +44,9 @@ export default class Post extends React.Component {
     tags() { // generate tags
         var bunny = [];
         if(this.props.route.posts.post['tag']) {
-            (this.props.route.posts.post['tag']).map(function (data) {
+            (this.props.route.posts.post['tag']).map(function (data, index) {
                 bunny.push(
-                    <button className="btn btn-default" role="button" key={Math.random()}>
+                    <button className="btn btn-default" role="button" key={ index }>
                         #{data}
                     </button>
                 )
@@ -55,8 +55,8 @@ export default class Post extends React.Component {
                 <div> Tags: {bunny}
                     <hr/>
                     <Link className="btn btn-info"
-                                    to={'/dashboard/posts/' + this.props.route.posts.pageId + '/edit/'}
-                                    role="button">Edit</Link>
+                          to={'/dashboard/posts/' + this.props.route.posts.pageId + '/edit/'}
+                          role="button">Edit</Link>
 
                     <button className="btn btn-danger" data-toggle="confirmation" onClick={this.deletePost()
                     }>Delete</button>
