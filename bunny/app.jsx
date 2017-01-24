@@ -9,6 +9,8 @@ import Main from './components/Main.jsx';
 import Secret from './components/Secret.jsx';
 import Form from './components/Form.jsx';
 import Notes from './components/Notes.jsx';
+import NoteEdit from './components/NoteEdit.jsx';
+import {Notes as NotesStore} from './models/Notes.jsx';
 import axios from 'axios';
 import { Diary } from './models/Diary.jsx';
 
@@ -34,6 +36,7 @@ function authRequired(nextState, replace) {
 }
 
 var diary = new Diary();
+var notes = new NotesStore();
 
 ReactDOM.render(
     <Router history={browserHistory} >
@@ -45,7 +48,8 @@ ReactDOM.render(
             <Route path="posts/:id/" posts={ diary } component={Post} />
             <Route path="posts/:id/edit" posts={ diary } component={PostEdit} />
             <Route path="new" component={Form} />
-            <Route path="notes" component={Notes} />
+            <Route path="notes" notes={notes} component={Notes} />
+            <Route path="notes/:id/" notes={notes} component={NoteEdit} />
         </Route>
 
     </Router>,
