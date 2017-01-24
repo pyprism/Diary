@@ -18,7 +18,7 @@ export default class Posts extends React.Component {
     hiren() { // post's title list
         return (this.props.route.posts.posts).map((data, index) => {
             return (
-                <div className="post-preview" key={ index }>
+                <div className="post-preview" key={ data.id }>
                     <Link to={'/dashboard/posts/' + data.id + '/'}>
                         <h2 className="post-title">
                             {data.title}
