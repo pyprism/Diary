@@ -13,6 +13,9 @@ export class Diary {
     @observable pageId = 0;
 
     @action getPosts() {
+
+        this.posts = [];  // need this line :/  or otherwise u will get duplicate value after 2nd ajax request ! :O
+
         axios({
             method: 'get',
             url: '/api/diary/',
@@ -49,10 +52,7 @@ export class Diary {
         this.loadingText = 'Loading from remote server....';
     }
 
-    @computed get Data() {
-        return this.posts;
-    }
-
+    
     findMe(key) {
         return key.id == this.pageId;
     }
