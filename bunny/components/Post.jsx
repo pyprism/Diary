@@ -20,25 +20,27 @@ export default class Post extends React.Component {
     }
 
     deletePost() {  // delete button
-        var _id = this.props.route.posts.pageId;
+        var id = this.props.route.posts.pageId;
 
-        $('[data-toggle=confirmation]').confirmation({
-            rootSelector: '[data-toggle=confirmation]',
-            onConfirm: function () {
+        let message = "Delete the post",
+            title = "Are you sure ?";
+        eModal.confirm(message, title)
+            .then(function(){
                 axios({
                     method: 'delete',
-                    url: '/api/diary/' + _id + '/',
+                    url: '/api/diary/' + id + '/',
                     headers: {
                         'Authorization': "JWT " + sessionStorage.getItem('token')
                     }
                 }).then(function (data) {
-                    sweetAlert("Deleted", "Deleted Successfully", "success");
+                    sweetAlert("Deleted", "Post deleted", "success");
                     browserHistory.push('/dashboard/posts/');
                 }).catch(function (error) {
-                    sweetAlert("Warning", "Error in deletion", "error");
+                    sweetAlert("Error", "Error in deletion!", "error");
                 })
-            }
-        });
+            }, function(){
+
+            });
     }
 
     tags() { // generate tags
@@ -58,8 +60,7 @@ export default class Post extends React.Component {
                           to={'/dashboard/posts/' + this.props.route.posts.pageId + '/edit/'}
                           role="button">Edit</Link>
 
-                    <button className="btn btn-danger" data-toggle="confirmation" onClick={this.deletePost()
-                    }>Delete</button>
+                    <button className="btn btn-danger"  onClick={this.deletePost.bind(this)}>Delete</button>
                 </div>
             );
         }
