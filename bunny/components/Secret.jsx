@@ -20,6 +20,7 @@ export default class Secret extends React.Component {
                 link={[
                     {"rel": "stylesheet", "href": "/static/css/login.css"},
                     {"rel": "icon", "href": "/static/favicon.ico"},
+                    {"rel": "stylesheet", "type": "text/css", "href": "/static/css/sweetalert.css"}
                 ]}
             />
 
