@@ -6,7 +6,6 @@ import { browserHistory } from 'react-router';
 import { observer } from "mobx-react";
 import {Link} from 'react-router';
 import Crypt from '../utils/Crypt';
-//import NoteEdit from "./NoteEdit.jsx";
 
 
 @observer
