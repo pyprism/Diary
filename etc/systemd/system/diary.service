@@ -1,0 +1,8 @@
+[Unit]
+Description=uWSGI instance to serve Diary
+
+[Service]
+ExecStart=/bin/bash -c 'su prism; cd /home/prism/prod/Diary; source .env/bin/activate; uwsgi --ini hiren.ini'
+
+[Install]
+WantedBy=multi-user.target
