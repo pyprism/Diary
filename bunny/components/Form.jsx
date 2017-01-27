@@ -21,9 +21,9 @@ export default class Form extends React.Component {
             var _url = '/api/diary/';
 
         // key, salt generation
-        let  random = forge.random.getBytesSync(16),
+        let  random = forge.random.getBytesSync(32),
             _salt = forge.random.getBytesSync(128),
-            key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'), _salt, 100, 16);
+            key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'), _salt, 1500, 32);
 
         // input tag string manipulation for django-taggit format
         var tagStr = ReactDOM.findDOMNode(this.refs.tag).value;
