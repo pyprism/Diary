@@ -23,7 +23,7 @@ export class Notes {
             (response.data).map(function (note) {
                 let salt = forge.util.hexToBytes(note['salt']);
                 let key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'),
-                    salt, 100, 16);
+                    salt, 1500, 32);
                 let hiren = {};
                 hiren['id'] = note['id'];
                 hiren['content'] = Crypt.decrypt(note['content'], key, note['iv']);
