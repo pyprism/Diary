@@ -14,7 +14,7 @@ export class Diary {
 
     @action getPosts() {
 
-        this.posts = [];  // need this line :/  or otherwise u will get duplicate value after 2nd ajax request ! :O
+        this.posts = [];  // need this line :/ otherwise u will get duplicate value after 2nd ajax request ! :O
 
         axios({
             method: 'get',
@@ -25,7 +25,7 @@ export class Diary {
             (response.data).map(function (post) {
                 let salt = forge.util.hexToBytes(post['salt']);
                 let key = forge.pkcs5.pbkdf2(sessionStorage.getItem('key'),
-                    salt, 100, 16);
+                    salt, 1500, 32);
                 let hiren = {};
                 hiren['id'] = post['id'];
                 hiren['title'] = Crypt.decrypt(post['title'], key, post['iv']);
