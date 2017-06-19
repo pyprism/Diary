@@ -13,7 +13,7 @@ psycopg2==2.7.1
 PyJWT==1.5.0
 python-dateutil==2.6.0
 requests==2.18.1
-simplejson==3.10.0
+simplejson==3.11.1
 six==1.10.0
 uritemplate==3.0.0
 uwsgi==2.0.15
