@@ -96,9 +96,9 @@ class NotesViewTest(TransactionTestCase):
         self.assertEqual(response.json(), {'content': 'test content', 'id': 1,
                                            'tag': [self.tag], 'iv': "random",
                                            'salt': '',
-                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                                           'created_at': '2012-01-14T00:00:00Z',
-                                           'updated_at': '2012-01-14T00:00:00Z'})
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%f'),
+                                           'created_at': '2012-01-14T00:00:00',
+                                           'updated_at': '2012-01-14T00:00:00'})
 
     @freeze_time("2012-01-14")
     def test_note_update_works(self):
@@ -106,20 +106,19 @@ class NotesViewTest(TransactionTestCase):
         self.assertEqual(response.json(), {'content': 'Updated content', 'id': 1,
                                            'tag': [self.tag], 'iv': 'random',
                                            'salt': '',
-                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                                           'created_at': '2012-01-14T00:00:00Z',
-                                           'updated_at': '2012-01-14T00:00:00Z'})
+                                           'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%f'),
+                                           'created_at': '2012-01-14T00:00:00',
+                                           'updated_at': '2012-01-14T00:00:00'})
 
     # @freeze_time("2012-01-14")
     # def test_new_note_creation_works(self):
-    #     response = self.client.post('/api/notes/', data=json.dumps({'tag': ["xyz"], 'iv': 'random',
-    #                                                                'content': "New content",
-    #                                                                'salt': 'sa'}), format='json')
-    #    print(response.json())
-        # self.assertEqual(response.json(), {'id': 2, 'tag': [self.tag], 'iv': 'random', 'content': "New content",
-        #                                    'date': self.current_date_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-        #                                    'created_at': '2012-01-14T00:00:00Z',
-        #                                    'updated_at': '2012-01-14T00:00:00Z'})
+    #     response = self.client.post('/api/notes/', data={'tag': ["xyz"], 'iv': 'random', 'content': "New content",
+    #                                                      'salt': 'sa', 'date': "2012-01-14T00:00:00"}, format="json")
+    #     print(response.json())
+    #     self.assertEqual(response.json(), {'id': 2, 'tag': [self.tag], 'iv': 'random', 'content': "New content",
+    #                                        'date': '2012-01-14T00:00:00',
+    #                                        'created_at': '2012-01-14T00:00:00',
+    #                                        'updated_at': '2012-01-14T00:00:00'})
     #
     # def test_deleting_note_works(self):
     #     #self.client.post('/api/notes/', data={'tag': [self.tag], 'iv': 'random', 'content': "New content !",
