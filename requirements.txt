@@ -9,7 +9,7 @@ djangorestframework-jwt==1.11.0
 freezegun==0.3.11
 itypes==1.1.0
 openapi-codec==1.3.2
-psycopg2==2.8.2
+psycopg2==2.8.5
 PyJWT==1.7.1
 python-dateutil==2.8.0
 requests==2.22.0
