@@ -1,0 +1,10 @@
+{
+  "secret_key": "",
+  "debug": "",
+  "allowed_hosts": [],
+  "timezone": "UTC",
+  "db_name": "",
+  "db_password": "",
+  "db_user": "",
+  "db_host": ""
+}
