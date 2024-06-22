@@ -150,3 +150,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # debug toolbar
 INTERNAL_IPS = ["127.0.0.1"]
+
+# Custom user model
+AUTH_USER_MODEL = "base.User"
