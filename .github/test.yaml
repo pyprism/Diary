@@ -1,0 +1,32 @@
+name: Django tests
+on:
+  push:
+    branches: ['dev']
+  pull_request:
+    branches: ['master']
+jobs:
+  container-job:
+    runs-on: ubuntu-latest
+    container: python:3.12-bookworm
+
+    services:
+      postgres:
+        image: postgres:16.3-alpine3.20
+        env:
+          POSTGRES_PASSWORD: hiren
+          POSTGRES_USER: hiren
+          POSTGRES_DB: diary
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+  steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: pip install requirements.txt
