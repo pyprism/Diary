@@ -24,9 +24,11 @@ jobs:
         ports:
           - 5432:5432
 
-  steps:
-    - name: Check out repository code
-      uses: actions/checkout@v4
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: pip install requirements.txt
+      - name: Install dependencies
+        run: pip install requirements.txt
+
+
