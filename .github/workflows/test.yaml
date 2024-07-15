@@ -36,7 +36,7 @@ jobs:
         env:
           SECRET_KEY: xyz1234567890qwerty
           DEBUG: False
-          ALLOWED_HOSTS: ['localhost', '127.0.0.1']
+          ALLOWED_HOSTS: 'localhost', '127.0.0.1'
           TIMEZONE: Asia/Dhaka
           DB_NAME: diary,
           DB_PASSWORD: hiren,
