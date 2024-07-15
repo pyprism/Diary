@@ -31,28 +31,40 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Set environment variables
+#      - name: Set environment variables
+#        run: |
+#            echo "SECRET_KEY=xyz1234567890qwerty" >> $GITHUB_ENV
+#            echo "DEBUG=False" >> $GITHUB_ENV
+#            echo "ALLOWED_HOSTS=['localhost','127.0.0.1']" >> $GITHUB_ENV
+#            echo "TIMEZONE=Asia/Dhaka" >> $GITHUB_ENV
+#            echo "DB_NAME=diary" >> $GITHUB_ENV
+#            echo "DB_PASSWORD=hiren" >> $GITHUB_ENV
+#            echo "DB_USER=hiren" >> $GITHUB_ENV
+#            echo "DB_HOST=postgres" >> $GITHUB_ENV
+      - name: Generate JSON file from environment variables
         run: |
-            echo "SECRET_KEY=xyz1234567890qwerty" >> $GITHUB_ENV
-            echo "DEBUG=False" >> $GITHUB_ENV
-            echo "ALLOWED_HOSTS=['localhost','127.0.0.1']" >> $GITHUB_ENV
-            echo "TIMEZONE=Asia/Dhaka" >> $GITHUB_ENV
-            echo "DB_NAME=diary" >> $GITHUB_ENV
-            echo "DB_PASSWORD=hiren" >> $GITHUB_ENV
-            echo "DB_USER=hiren" >> $GITHUB_ENV
-            echo "DB_HOST=postgres" >> $GITHUB_ENV
+            echo '{
+              "SECRET_KEY": "xyz1234567890qwerty",
+              "DEBUG": "'False",
+              "ALLOWED_HOSTS": "['localhost','127.0.0.1']",
+              "TIMEZONE": "Asia/Dhaka",
+              "DB_NAME": "diary",
+              "DB_PASSWORD": "hiren",
+              "DB_USER": "hiren",
+              "DB_HOST": "postgres"
+            }' > config.json
 
       - name: Test with pytest
         run: pytest -vv
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DEBUG: ${{ env.DEBUG }}
-          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
-          TIMEZONE: ${{ env.TIMEZONE }}
-          DB_NAME: ${{ env.DB_NAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_HOST: ${{ env.DB_HOST }}
+#        env:
+#          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+#          DEBUG: ${{ env.DEBUG }}
+#          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
+#          TIMEZONE: ${{ env.TIMEZONE }}
+#          DB_NAME: ${{ env.DB_NAME }}
+#          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#          DB_USER: ${{ secrets.DB_USER }}
+#          DB_HOST: ${{ env.DB_HOST }}
 
 
 
