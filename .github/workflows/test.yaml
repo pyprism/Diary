@@ -28,11 +28,20 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Test with pytest
+        run: pytest -vv
+        env:
+          secret_key: xyz1234567890qwerty
+          debug: False
+          allowed_hosts: "['localhost', '127.0.0.1']"
+          timezone: Asia/Dhaka
+          db_name: diary,
+          db_password: hiren,
+          db_user: hiren,
+          db_host: postgres
+
 
 
