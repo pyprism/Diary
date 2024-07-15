@@ -34,14 +34,14 @@ jobs:
       - name: Test with pytest
         run: pytest -vv
         env:
-          secret_key: xyz1234567890qwerty
-          debug: False
-          allowed_hosts: "['localhost', '127.0.0.1']"
-          timezone: Asia/Dhaka
-          db_name: diary,
-          db_password: hiren,
-          db_user: hiren,
-          db_host: postgres
+          SECRET_KEY: xyz1234567890qwerty
+          DEBUG: False
+          ALLOWED_HOSTS: "['localhost', '127.0.0.1']"
+          TIMEZONE: Asia/Dhaka
+          DB_NAME: diary,
+          DB_PASSWORD: hiren,
+          DB_USER: hiren,
+          DB_HOST: postgres
 
 
 
