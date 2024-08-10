@@ -20,6 +20,8 @@ from django.urls import path, include, re_path
 
 urls = [
     path("admin/", admin.site.urls),
+    path("api/", include('diary.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 ]
 
 if settings.DEBUG:
