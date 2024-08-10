@@ -232,3 +232,43 @@ LOGGING = {
     }
 }
 
+# remove slash after URL
+trailing_slash = False
+
+# date for to support 'deshi' style
+DATE_INPUT_FORMATS = ['%d-%m-%Y']
+DATE_FORMAT = "d-m-Y"
+
+# DRF
+DEFAULT_RENDERER_CLASSES = (
+    'rest_framework.renderers.JSONRenderer',
+)
+
+
+if DEBUG:
+    DEFAULT_RENDERER_CLASSES = DEFAULT_RENDERER_CLASSES + (
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/minute',
+        'user': '40/minute',
+    },
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ),
+    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# 5 months login duration
+SESSION_COOKIE_AGE = 13150000
+
+
+
