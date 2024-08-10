@@ -190,7 +190,7 @@ LOGGING = {
         'production_file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR + '/logs/main.log',
+            'filename': BASE_DIR / 'logs/main.log',
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 7,
             'formatter': 'main_formatter',
@@ -199,7 +199,7 @@ LOGGING = {
         'debug_file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR + '/logs/main_debug.log',
+            'filename': BASE_DIR / 'logs/main_debug.log',
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 7,
             'formatter': 'main_formatter',
@@ -265,6 +265,9 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
 
 # 5 months login duration
