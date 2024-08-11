@@ -121,6 +121,18 @@ def test_only_authenticated_user_can_access(api_client, create_user):
     assert response.data['detail'] == 'Authentication credentials were not provided.'
 
 
+@pytest.mark.django_db
+def test_tag_is_unique_for_each_user(api_client, create_user, authenticated_client):
+    authenticated_client()
+
+    data = {
+        'name': 'Test Tag'
+    }
+
+    api_client.post(reverse('tags-list'), data)
+    response = api_client.post(reverse('tags-list'), data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data['non_field_errors'][0] == 'A tag with this name already exists for the user.'
 
 
 
