@@ -49,7 +49,7 @@ def test_create_tag(api_client, create_user, authenticated_client):
 
 @pytest.mark.django_db
 def test_update_tag(api_client, create_user, authenticated_client):
-    client, user = authenticated_client()
+    authenticated_client()
 
     data = {
         'name': 'Test Tag'
@@ -66,5 +66,61 @@ def test_update_tag(api_client, create_user, authenticated_client):
     assert response.status_code == status.HTTP_200_OK
     tag = Tag.objects.get(id=2)
     assert tag.name == 'updated test Tag'
+
+
+@pytest.mark.django_db
+def test_delete_tag(api_client, create_user, authenticated_client):
+    authenticated_client()
+
+    data = {
+        'name': 'Test Tag'
+    }
+    api_client.post(reverse('tags-list'), data)
+
+    response = api_client.delete(reverse('tags-detail', kwargs={'pk': 3}))
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    tag = Tag.objects.filter(id=2).count()
+    assert tag == 0
+
+
+@pytest.mark.django_db
+def test_list_tags(api_client, create_user, authenticated_client):
+    authenticated_client()
+
+    data = {
+        'name': 'Test Tag'
+    }
+    api_client.post(reverse('tags-list'), data)
+
+    response = api_client.get(reverse('tags-list'))
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response.data['count'] == 1
+
+
+@pytest.mark.django_db
+def test_tag_detail(api_client, create_user, authenticated_client):
+    authenticated_client()
+
+    data = {
+        'name': 'Test Tag'
+    }
+
+    api_client.post(reverse('tags-list'), data)
+
+    response = api_client.get(reverse('tags-detail', kwargs={'pk': 5}))
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['name'] == 'Test Tag'
+
+
+@pytest.mark.django_db
+def test_only_authenticated_user_can_access(api_client, create_user):
+    response = api_client.get(reverse('tags-list'))
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.data['detail'] == 'Authentication credentials were not provided.'
+
+
+
 
 
