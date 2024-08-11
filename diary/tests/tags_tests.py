@@ -21,10 +21,18 @@ def create_user():
     return _create_user
 
 
+@pytest.fixture
+def authenticated_client(api_client, create_user):
+    def _authenticated_client(email='testuser@yo.com', password='testpass'):
+        user = create_user(email=email, password=password)
+        api_client.force_authenticate(user=user)
+        return api_client, user
+    return _authenticated_client
+
+
 @pytest.mark.django_db
-def test_create_tag(api_client, create_user):
-    user = create_user(email='testuser@yo.com', password='testpass')
-    api_client.force_authenticate(user=user)
+def test_create_tag(api_client, create_user, authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
@@ -40,9 +48,8 @@ def test_create_tag(api_client, create_user):
 
 
 @pytest.mark.django_db
-def test_update_tag(api_client, create_user):
-    user = create_user(email='testuser@yo.com', password='<PASSWORD>')
-    api_client.force_authenticate(user=user)
+def test_update_tag(api_client, create_user, authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
