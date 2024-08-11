@@ -1,3 +1,5 @@
-# Diary [![Requirements Status](https://requires.io/github/pyprism/Diary/requirements.svg?branch=master)](https://requires.io/github/pyprism/Diary/requirements/?branch=master) [![Build Status](https://travis-ci.org/pyprism/Diary.svg?branch=master)](https://travis-ci.org/pyprism/Diary) [![Coverage Status](https://coveralls.io/repos/github/pyprism/Diary/badge.svg?branch=master)](https://coveralls.io/github/pyprism/Diary?branch=master)  [![Dependency Status](https://david-dm.org/pyprism/Diary.svg)](https://david-dm.org/pyprism/Diary)
+# Diary [![Tests](https://github.com/pyprism/Diary/actions/workflows/test.yaml/badge.svg)](https://github.com/pyprism/Diary/actions/workflows/test.yaml)
 
-Simple Django based Diary to keep daily notes  :notebook:
+Simple Django based Diary :notebook:
+
+A straightforward and minimalist Django based diary application for keeping daily notes. While it may be simple, it’s designed to be helpful for daily personal usage.
