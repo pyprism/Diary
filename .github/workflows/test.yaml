@@ -45,7 +45,7 @@ jobs:
             }' > config.json
 
       - name: Test with pytest
-        run: pytest -vv
+        run: pytest -vv -s
 
 
 
