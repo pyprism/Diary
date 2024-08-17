@@ -31,14 +31,14 @@ def authenticated_client(api_client, create_user):
 
 
 @pytest.mark.django_db
-def test_create_tag(api_client, create_user, authenticated_client):
+def test_create_tag(authenticated_client):
     client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
 
-    response = api_client.post(reverse('tags-list'), data)
+    response = client.post(reverse('tags-list'), data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -48,20 +48,20 @@ def test_create_tag(api_client, create_user, authenticated_client):
 
 
 @pytest.mark.django_db
-def test_update_tag(api_client, create_user, authenticated_client):
-    authenticated_client()
+def test_update_tag(authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
 
-    api_client.post(reverse('tags-list'), data)
+    client.post(reverse('tags-list'), data)
 
     data = {
         'name': 'updated test Tag'
     }
 
-    response = api_client.put(reverse('tags-detail', kwargs={'pk': 2}), data)
+    response = client.put(reverse('tags-detail', kwargs={'pk': 2}), data)
 
     assert response.status_code == status.HTTP_200_OK
     tag = Tag.objects.get(id=2)
@@ -69,68 +69,68 @@ def test_update_tag(api_client, create_user, authenticated_client):
 
 
 @pytest.mark.django_db
-def test_delete_tag(api_client, create_user, authenticated_client):
-    authenticated_client()
+def test_delete_tag(authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
-    api_client.post(reverse('tags-list'), data)
+    client.post(reverse('tags-list'), data)
 
-    response = api_client.delete(reverse('tags-detail', kwargs={'pk': 3}))
+    response = client.delete(reverse('tags-detail', kwargs={'pk': 3}))
     assert response.status_code == status.HTTP_204_NO_CONTENT
     tag = Tag.objects.filter(id=2).count()
     assert tag == 0
 
 
 @pytest.mark.django_db
-def test_list_tags(api_client, create_user, authenticated_client):
-    authenticated_client()
+def test_list_tags(authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
-    api_client.post(reverse('tags-list'), data)
+    client.post(reverse('tags-list'), data)
 
-    response = api_client.get(reverse('tags-list'))
+    response = client.get(reverse('tags-list'))
     assert response.status_code == status.HTTP_200_OK
 
     assert response.data['count'] == 1
 
 
 @pytest.mark.django_db
-def test_tag_detail(api_client, create_user, authenticated_client):
-    authenticated_client()
+def test_tag_detail(authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
 
-    api_client.post(reverse('tags-list'), data)
+    client.post(reverse('tags-list'), data)
 
-    response = api_client.get(reverse('tags-detail', kwargs={'pk': 5}))
+    response = client.get(reverse('tags-detail', kwargs={'pk': 5}))
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data['name'] == 'Test Tag'
 
 
 @pytest.mark.django_db
-def test_only_authenticated_user_can_access(api_client, create_user):
+def test_only_authenticated_user_can_access(api_client):
     response = api_client.get(reverse('tags-list'))
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.data['detail'] == 'Authentication credentials were not provided.'
 
 
 @pytest.mark.django_db
-def test_tag_is_unique_for_each_user(api_client, create_user, authenticated_client):
-    authenticated_client()
+def test_tag_is_unique_for_each_user(authenticated_client):
+    client, user = authenticated_client()
 
     data = {
         'name': 'Test Tag'
     }
 
-    api_client.post(reverse('tags-list'), data)
-    response = api_client.post(reverse('tags-list'), data)
+    client.post(reverse('tags-list'), data)
+    response = client.post(reverse('tags-list'), data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.data['non_field_errors'][0] == 'A tag with this name already exists for the user.'
 
