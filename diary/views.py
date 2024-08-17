@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from diary.models import Tag
-from diary.serializers import TagSerializer
+from diary.models import Tag, Diary
+from diary.serializers import TagSerializer, DiarySerializer
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -16,4 +16,12 @@ class TagViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+class DiaryViewSet(viewsets.ModelViewSet):
+    queryset = Diary.objects.get_all_diaries()
+    permission_classes = [IsAuthenticated]
+    serializer_class = DiarySerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Diary.objects.get_all_diaries(user)
+        return queryset
