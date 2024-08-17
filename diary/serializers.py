@@ -34,7 +34,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class DiarySerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
-    tags_attach = serializers.ListField(child=serializers.CharField(), write_only=True)
+    tags_attach = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
 
     def validate(self, data):
         user = self.context['request'].user
@@ -51,7 +51,7 @@ class DiarySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         validated_data['user'] = user
-        tags_data = validated_data.pop('tags_attach', None, [])
+        tags_data = validated_data.pop('tags_attach', [])
         diary = super().create(validated_data)
 
         for tag_data in tags_data:
