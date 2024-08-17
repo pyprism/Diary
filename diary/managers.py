@@ -8,6 +8,9 @@ class TagManager(models.Manager):
     def get_tag(self, user, tag):
         return self.filter(user=user, name=tag).first()
 
+    def is_tag_exists_for_user(self, user, tag):
+        return self.filter(user=user, name=tag).exists()
+
     def get_all_tags(self, user=None):
         if user:
             return self.filter(user=user).order_by('name')
@@ -19,6 +22,11 @@ class DiaryManager(models.Manager):
         return self.create(user=user, diary=diary, post_type=post_type, tags=tag)
 
     def get_diary_by_tag(self, user, tag):
-        return self.filter(user=user, name=tag).all()
+        return self.filter(user=user, name=tag).prefetch_related('tags').all()
+
+    def get_all_diaries(self, user=None):
+        if user:
+            return self.filter(user=user).order_by('created_at').prefetch_related('tags')
+        return self.order_by('created_at').prefetch_related('tags')
 
 
