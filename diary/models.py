@@ -25,7 +25,7 @@ POST_TYPE_CHOICES = (
 class Diary(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    tags = models.ManyToManyField(Tag, blank=True, null=True)
+    tags = models.ManyToManyField(Tag, blank=True)
     post_type = models.CharField(max_length=50, choices=POST_TYPE_CHOICES)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
