@@ -24,7 +24,7 @@ def create_user():
 
 
 @pytest.fixture
-def create_tag(create_user):
+def create_tag():
     def _create_tag(email='example@example.com', **kwargs):
         user = User.objects.filter(email=email).first()
         return Tag.objects.create(user=user, **kwargs)
