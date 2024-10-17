@@ -1,8 +1,8 @@
 django==5.1.1
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 uWSGI==2.0.26
 sentry-sdk==2.14.0
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 uWSGI==2.0.26
 freezegun==1.5.1
 pre-commit==3.8.0
