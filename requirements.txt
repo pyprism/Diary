@@ -1,7 +1,7 @@
-django==5.1.1
+django==5.1.4
 psycopg2-binary==2.9.9
 uWSGI==2.0.28
-sentry-sdk==2.14.0
+sentry-sdk==2.19.2
 psycopg2-binary==2.9.9
 uWSGI==2.0.28
 freezegun==1.5.1
