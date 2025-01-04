@@ -8,5 +8,5 @@ pre-commit==4.0.1
 django-debug-toolbar==4.4.6
 pytest-django==4.9.0
 djangorestframework==3.15.2
-markdown==3.6
+markdown==3.7
 django-filter==24.3
