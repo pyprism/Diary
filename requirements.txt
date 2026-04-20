@@ -9,4 +9,4 @@ django-debug-toolbar==6.0.0
 pytest-django==4.11.1
 djangorestframework==3.16.1
 markdown==3.8
-django-filter==25.1
+django-filter==25.2
