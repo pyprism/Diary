@@ -3,7 +3,7 @@ psycopg2-binary==2.9.11
 uWSGI==2.0.29
 sentry-sdk==2.58.0
 uWSGI==2.0.29
-pre-commit==4.3.0
+pre-commit==4.5.1
 freezegun==1.5.5
 django-debug-toolbar==6.3.0
 pytest-django==4.11.1
