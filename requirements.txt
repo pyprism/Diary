@@ -1,5 +1,5 @@
+django==5.2.7
 psycopg2-binary==2.9.11
-django==5.1.7
 uWSGI==2.0.29
 sentry-sdk==2.43.0
 uWSGI==2.0.29
