@@ -8,5 +8,5 @@ freezegun==1.5.5
 django-debug-toolbar==6.3.0
 pytest-django==4.11.1
 markdown==3.10.2
-djangorestframework==3.16.1
+djangorestframework==3.17.1
 django-filter==25.2
