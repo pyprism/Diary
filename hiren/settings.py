@@ -14,28 +14,30 @@ import json
 import os
 from pathlib import Path
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+from utils.cors_generator import generate_cors_regex_from_hosts
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# load config file
-try:
-    with open(BASE_DIR / "config.local.json") as f:
-        JSON_DATA = json.load(f)
-except FileNotFoundError:
-    with open(BASE_DIR / "config.json") as f:
-        JSON_DATA = json.load(f)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY", JSON_DATA["secret_key"])
+SECRET_KEY = os.environ.get("secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", JSON_DATA["debug"])
+DEBUG = os.environ.get("debug", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", JSON_DATA["allowed_hosts"])
+allowed_hosts_value = os.environ.get("allowed_hosts", "")
+if allowed_hosts_value:
+    ALLOWED_HOSTS = [
+        host.strip() for host in allowed_hosts_value.split(",") if host.strip()
+    ]
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -89,15 +91,19 @@ WSGI_APPLICATION = "hiren.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", JSON_DATA["db_name"]),
-        "USER": os.environ.get("DB_USER", JSON_DATA["db_user"]),
-        "PASSWORD": os.environ.get("DB_PASSWORD", JSON_DATA["db_password"]),
-        "HOST": os.environ.get("DB_HOST", JSON_DATA["db_host"]),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        "NAME": os.environ.get("db_name"),
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "USER": os.environ.get("db_user"),
+        "PASSWORD": os.environ.get("db_password"),
+        "HOST": os.environ.get("db_host"),
+        "PORT": os.environ.get("db_port", "5432"),
         "CONN_MAX_AGE": 600,
+        "OPTIONS": {
+            "pool": True,
+        },
     }
 }
 
@@ -126,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = os.environ.get("TIME_ZONE", JSON_DATA["timezone"])
+TIME_ZONE = os.environ.get("time_zone", "UTC")
 
 USE_I18N = False
 
@@ -145,10 +151,6 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # debug toolbar
 INTERNAL_IPS = ["127.0.0.1"]
@@ -158,123 +160,131 @@ AUTH_USER_MODEL = "base.User"
 
 # logger
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
-        }
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
     },
-    'formatters': {
-        'main_formatter': {
-            'format': '%(levelname)s:%(name)s: %(message)s '
-                      '(%(asctime)s; %(filename)s:%(lineno)d)',
-            'datefmt': "%d-%m-%Y %H:%M:%S",
+    "formatters": {
+        "main_formatter": {
+            "format": "%(levelname)s:%(name)s: %(message)s "
+            "(%(asctime)s; %(filename)s:%(lineno)d)",
+            "datefmt": "%d-%m-%Y %H:%M:%S",
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+    "handlers": {
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
         },
-        'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'main_formatter',
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "main_formatter",
         },
-        'production_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/main.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 7,
-            'formatter': 'main_formatter',
-            'filters': ['require_debug_false'],
+        "production_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/main.log",
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 7,
+            "formatter": "main_formatter",
+            "filters": ["require_debug_false"],
         },
-        'debug_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs/main_debug.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 7,
-            'formatter': 'main_formatter',
-            'filters': ['require_debug_true'],
+        "debug_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs/main_debug.log",
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 7,
+            "formatter": "main_formatter",
+            "filters": ["require_debug_true"],
         },
-        'null': {
-            "class": 'logging.NullHandler',
-        }
+        "null": {
+            "class": "logging.NullHandler",
+        },
     },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins', 'console'],
-            'level': 'ERROR',
-            'propagate': True,
+    "loggers": {
+        "django.request": {
+            "handlers": ["mail_admins", "console"],
+            "level": "ERROR",
+            "propagate": True,
         },
-        'django': {
-            'handlers': ['null', ],
+        "django": {
+            "handlers": [
+                "null",
+            ],
         },
-        'py.warnings': {
-            'handlers': ['null', ],
+        "py.warnings": {
+            "handlers": [
+                "null",
+            ],
         },
-        '': {
-            'handlers': ['console', 'production_file', 'debug_file'],
-            'level': "DEBUG",
+        "": {
+            "handlers": ["console", "production_file", "debug_file"],
+            "level": "DEBUG",
         },
         # 'django.db.backends': {
         #      'handlers': ['console'],
         #      'level': 'DEBUG',
         # },
-    }
+    },
 }
 
 # remove slash after URL
 trailing_slash = False
 
 # date for to support 'deshi' style
-DATE_INPUT_FORMATS = ['%d-%m-%Y']
+DATE_INPUT_FORMATS = ["%d-%m-%Y"]
 DATE_FORMAT = "d-m-Y"
 
 # DRF
-DEFAULT_RENDERER_CLASSES = (
-    'rest_framework.renderers.JSONRenderer',
-)
+DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
 
 
 if DEBUG:
     DEFAULT_RENDERER_CLASSES = DEFAULT_RENDERER_CLASSES + (
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        "rest_framework.renderers.BrowsableAPIRenderer",
     )
 REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': (
-        'rest_framework.throttling.AnonRateThrottle',
-    ),
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '60/minute',
-        'user': '40/minute',
+    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.AnonRateThrottle",),
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/minute",
+        "user": "40/minute",
     },
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
     ),
-    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
 
 # 5 months login duration
 SESSION_COOKIE_AGE = 13150000
 
+if not DEBUG:
+    sentry_sdk.init(
+        dsn=os.environ.get("sentry_dsn"),
+        traces_sample_rate=1.0,
+        integrations=[
+            DjangoIntegration(),
+        ],
+    )
 
+# cors
+CORS_ALLOWED_ORIGIN_REGEXES = generate_cors_regex_from_hosts(ALLOWED_HOSTS)
 
+if DEBUG:
+    CORS_ORIGIN_ALLOW_ALL = True
