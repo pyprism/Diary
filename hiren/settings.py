@@ -10,14 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import json
 import os
 from pathlib import Path
+from datetime import timedelta
 
 import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from utils.cors_generator import generate_cors_regex_from_hosts
+from utils.ip import get_local_ip
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,15 +51,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "debug_toolbar",
     "base",
     "diary",
+    "corsheaders",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
+    "django_celery_results",
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+
 MIDDLEWARE = [
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -66,6 +74,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(1, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
 ROOT_URLCONF = "hiren.urls"
 
@@ -100,7 +111,7 @@ DATABASES = {
         "PASSWORD": os.environ.get("db_password"),
         "HOST": os.environ.get("db_host"),
         "PORT": os.environ.get("db_port", "5432"),
-        "CONN_MAX_AGE": 600,
+        # "CONN_MAX_AGE": 600,
         "OPTIONS": {
             "pool": True,
         },
@@ -153,7 +164,8 @@ STATICFILES_DIRS = [
 
 
 # debug toolbar
-INTERNAL_IPS = ["127.0.0.1"]
+if DEBUG:
+    INTERNAL_IPS = list(set(get_local_ip()))
 
 # Custom user model
 AUTH_USER_MODEL = "base.User"
@@ -234,8 +246,6 @@ LOGGING = {
     },
 }
 
-# remove slash after URL
-trailing_slash = False
 
 # date for to support 'deshi' style
 DATE_INPUT_FORMATS = ["%d-%m-%Y"]
@@ -250,7 +260,11 @@ if DEBUG:
         "rest_framework.renderers.BrowsableAPIRenderer",
     )
 REST_FRAMEWORK = {
-    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.AnonRateThrottle",),
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ),
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/minute",
         "user": "40/minute",
@@ -264,6 +278,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -278,9 +293,7 @@ if not DEBUG:
     sentry_sdk.init(
         dsn=os.environ.get("sentry_dsn"),
         traces_sample_rate=1.0,
-        integrations=[
-            DjangoIntegration(),
-        ],
+        integrations=[DjangoIntegration(), CeleryIntegration()],
     )
 
 # cors
@@ -288,3 +301,74 @@ CORS_ALLOWED_ORIGIN_REGEXES = generate_cors_regex_from_hosts(ALLOWED_HOSTS)
 
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
+
+# AWS S3 Settings
+AWS_ACCESS_KEY_ID = os.environ.get("aws_access_key_id")
+AWS_SECRET_ACCESS_KEY = os.environ.get("aws_secret_access_key")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("aws_storage_bucket_name")
+AWS_S3_REGION_NAME = os.environ.get("aws_s3_region_name")
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("aws_s3_custom_domain")
+AWS_S3_ENDPOINT_URL = os.environ.get("aws_s3_endpoint_url")
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+
+# Feature flags
+# Set REGISTRATION_OPEN=false in .env to disable new user sign-ups.
+REGISTRATION_OPEN = os.environ.get("registration_open", "true").lower() == "true"
+
+# Sharing
+# Default lifetime (seconds) for a public share link.  Override via env.
+SHARE_LINK_EXPIRY_SECONDS = int(
+    os.environ.get("share_link_expiry_seconds", 86400)
+)  # 24 h
+
+# JWT
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ.get("jwt_access_minutes", 60))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.environ.get("jwt_refresh_days", 30))
+    ),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+}
+
+# Celery
+CELERY_BROKER_URL = os.environ.get(
+    "rabbitmq_url", "amqp://guest:guest@localhost:5672//"
+)
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "django-cache"
+
+# Serialisation
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+
+# Reliability
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = True  # ack only after task succeeds
+CELERY_TASK_REJECT_ON_WORKER_LOST = True  # re-queue if worker dies mid-task
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # fair dispatch — one task at a time per worker
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000  # recycle workers to prevent memory leaks
+CELERY_WORKER_ENABLE_REMOTE_CONTROL = False  # avoid deprecated transient pidbox queues
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# Results TTL
+CELERY_RESULT_EXPIRES = timedelta(days=7)
+
+# Timezone (inherit from Django)
+CELERY_TIMEZONE = os.environ.get("time_zone", "UTC")
+CELERY_ENABLE_UTC = True
+
+# OpenRouter / LLM
+OPENROUTER_API_KEY = os.environ.get("openrouter_api_key", "")
+OPENROUTER_MODEL = os.environ.get("openrouter_model", "google/gemma-4-31b-it:free")
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+# Per-request timeout (seconds) before Celery retries the task
+OPENROUTER_TIMEOUT = int(os.environ.get("openrouter_timeout", 120))
