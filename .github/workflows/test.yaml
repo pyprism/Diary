@@ -1,51 +1,100 @@
-name: Django tests
+name: Django CI Tests
+
 on:
   push:
-    branches: ['dev', 'master']
+    branches: [ master ]
   pull_request:
-    branches: ['master', 'dev']
+    branches: [ master ]
+
 jobs:
-  test-job:
+  test:
     runs-on: ubuntu-latest
-    container: python:3.12-bookworm
 
     services:
       postgres:
-        image: postgres:16.3-alpine3.20
+        image: postgres:alpine
         env:
-          POSTGRES_PASSWORD: hiren
-          POSTGRES_USER: hiren
-          POSTGRES_DB: diary
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_diary_db
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
+
+    strategy:
+      matrix:
+        python-version: ['3.13', '3.14']
 
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Generate JSON file from environment variables
-        run: |
-            echo '{
-              "secret_key": "xyz1234567890qwerty",
-              "debug": "False",
-              "allowed_hosts": ["localhost","127.0.0.1"],
-              "timezone": "Asia/Dhaka",
-              "db_name": "diary",
-              "db_password": "hiren",
-              "db_user": "hiren",
-              "db_host": "postgres"
-            }' > config.json
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev
 
-      - name: Test with pytest
-        run: pytest -vv -s
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage
 
+    - name: Create .env config
+      run: |
+        cat > .env << EOF
+        secret_key=test-secret-key-for-ci
+        debug=true
+        allowed_hosts=*
+        db_host=localhost
+        db_port=5432
+        db_name=test_diary_db
+        db_user=postgres
+        db_password=postgres
+        EOF
 
+    - name: Run migrations
+      run: |
+        export $(grep -v '^#' .env | xargs)
+        python manage.py migrate --noinput
+
+    - name: Run tests with coverage
+      run: |
+        export $(grep -v '^#' .env | xargs)
+        coverage run --source='.' manage.py test
+        coverage report
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Check code quality (optional lint)
+      run: |
+        pip install flake8
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true

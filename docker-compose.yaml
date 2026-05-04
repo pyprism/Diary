@@ -1,28 +1,75 @@
 services:
-  db:
-    image: postgres:16.3-alpine3.20
-    shm_size: 128mb
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data/
+  celery_worker:
+    build:
+      context: .
+      target: production
+    container_name: diary_celery_worker
+    restart: unless-stopped
+    command: >
+      celery -A hiren worker
+        --loglevel=info
+        --concurrency=2
+        --max-tasks-per-child=1000
+        --without-gossip
+        --without-mingle
+    env_file: .env
     environment:
-      POSTGRES_DB: diary
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      db_host: host.docker.internal
+      rabbitmq_url: ${rabbitmq_url}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
   web:
-    build: .
-    command: "python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/app
+    build:
+      context: .
+      target: production          # use the final multi-stage target
+    container_name: diary_api
+    restart: unless-stopped
+
+    # env
+    env_file: .env                # loads secret_key, db_*, allowed_hosts, etc.
+    environment:
+      # Override db_host so Django talks to the Linux host's PostgreSQL.
+      # host.docker.internal resolves to the host IP automatically on Linux Docker.
+      db_host: host.docker.internal
+      rabbitmq_url: ${rabbitmq_url}
+
+    # networking
+    # Keep the container in its own network; reach host PG via extra_hosts.
     ports:
-      - "8000:8000"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 10m
-        max-file: 4
-    depends_on:
-      - db
+      - "127.0.0.1:${server_port}:8000"    # only expose to localhost; put nginx in front
+
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    #  volumes
+    volumes:
+      - logs:/app/logs
+
+    # health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h host.docker.internal -U $$db_user -d $$db_name"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+    # resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
 
 volumes:
-  postgres_data:
+  logs:
