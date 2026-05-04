@@ -33,6 +33,6 @@ def convert_image_to_web(file, quality=85, lossless=False):
         output.seek(0)
         filename = os.path.splitext(file.name)[0] + ".webp"
         file_content = output.getvalue()
-    except Exception as e:
-        raise serializers.ValidationError(f"Failed to convert image to WebP: {str(e)}")
+    except Exception:
+        raise serializers.ValidationError("Failed to convert image to WebP.")
     return filename, file_content
