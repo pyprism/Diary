@@ -21,7 +21,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
-# ── Stage 2: production image ─────────────────────────────────────────────────
+#  Stage 2: production image
 FROM python:3.14-slim AS production
 
 ENV PYTHONUNBUFFERED=1 \
@@ -49,7 +49,7 @@ COPY --chown=diary:diary . .
 RUN mkdir -p /app/logs && chown diary:diary /app/logs
 
 
-USER tracker
+USER diary
 
 # uWSGI serves on TCP 0.0.0.0:8000; override CMD for management commands
 CMD ["uwsgi", "--enable-threads", "--ini", "diary.ini"]
