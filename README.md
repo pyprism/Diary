@@ -1,4 +1,4 @@
-# Diary [![Tests](https://github.com/pyprism/Diary/actions/workflows/test.yaml/badge.svg)](https://github.com/pyprism/Diary/actions/workflows/test.yaml)
+# Diary [![Tests](https://github.com/pyprism/Diary/actions/workflows/test.yaml/badge.svg)](https://github.com/pyprism/Diary/actions/workflows/test.yaml) [![codecov](https://codecov.io/gh/pyprism/Diary/graph/badge.svg?token=pVxja5f22c)](https://codecov.io/gh/pyprism/Diary)
 
 Simple Django based Diary :notebook:
 
