@@ -106,7 +106,7 @@ WSGI_APPLICATION = "hiren.wsgi.application"
 DATABASES = {
     "default": {
         "NAME": os.environ.get("db_name"),
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "USER": os.environ.get("db_user"),
         "PASSWORD": os.environ.get("db_password"),
         "HOST": os.environ.get("db_host"),
