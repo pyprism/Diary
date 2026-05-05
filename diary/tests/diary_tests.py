@@ -24,6 +24,14 @@ VALID_CONTENT = {
 }
 
 
+def _entries_from_list_response(payload):
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        return payload.get("results", [])
+    return []
+
+
 @pytest.fixture
 def api_client():
     return APIClient()
@@ -352,7 +360,7 @@ def test_diary_list_search_across_diary_and_analysis_fields(
     response = client.get(reverse("diaries-list"), {"search": query})
     assert response.status_code == status.HTTP_200_OK
 
-    result_ids = {entry["id"] for entry in response.data}
+    result_ids = {entry["id"] for entry in _entries_from_list_response(response.data)}
     assert matching.id in result_ids
     assert non_matching.id not in result_ids
 
@@ -375,4 +383,6 @@ def test_diary_list_search_matches_diary_id(authenticated_client):
 
     response = client.get(reverse("diaries-list"), {"search": str(matching.id)})
     assert response.status_code == status.HTTP_200_OK
-    assert [entry["id"] for entry in response.data] == [matching.id]
+    assert [entry["id"] for entry in _entries_from_list_response(response.data)] == [
+        matching.id
+    ]
