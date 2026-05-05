@@ -292,6 +292,7 @@ SESSION_COOKIE_AGE = 13150000
 if not DEBUG:
     sentry_sdk.init(
         dsn=os.environ.get("sentry_dsn"),
+        send_default_pii=True,
         traces_sample_rate=1.0,
         integrations=[DjangoIntegration(), CeleryIntegration()],
     )
