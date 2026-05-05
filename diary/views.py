@@ -334,6 +334,8 @@ class ImageReadUrlView(views.APIView):
         serializer.is_valid(raise_exception=True)
 
         url = serializer.validated_data["url"]
+        # TODO check user own the url by verifying with the uploader
+
         signed_url = get_s3_uploader().generate_presigned_url(url, expiration=3600)
         if signed_url is None:
             return Response(
