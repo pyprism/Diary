@@ -1,0 +1,51 @@
+---
+# Main deployment playbook for Diary Django application (Docker-based)
+- name: Deploy Diary Application
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+  vars_files:
+    - vars/secrets.yml
+
+  pre_tasks:
+    - name: Display configuration
+      debug:
+        msg:
+          - "Deploying to: {{ inventory_hostname }}"
+          - "Base directory: {{ deployment_base_dir }}"
+          - "Deployment user: {{ deployment_user }}"
+          - "Port: {{ server_port }}"
+      tags: [always]
+
+  roles:
+    - role: common
+      tags: [common, setup]
+
+    - role: deployment_user
+      tags: [user, setup]
+
+    - role: docker
+      tags: [docker, deploy]
+
+  post_tasks:
+    - name: Verify container is running
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --status running --format "table {{ '{{' }}.Name{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_check
+      changed_when: false
+      tags: [always]
+
+    - name: Display deployment information
+      debug:
+        msg:
+          - "Deployment completed successfully!"
+          - "Project root: {{ project_root }}"
+          - ""
+          - "{{ container_check.stdout }}"
+          - ""
+          - "Check status: docker compose -f {{ project_root }}/docker-compose.yaml ps"
+          - "View logs: docker compose -f {{ project_root }}/docker-compose.yaml logs -f"
+      tags: [always]

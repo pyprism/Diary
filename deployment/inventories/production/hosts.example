@@ -1,0 +1,16 @@
+# Production Servers Inventory
+# =============================================================================
+# Add your server(s) here
+# Format: server-name ansible_host=IP_ADDRESS ansible_user=SSH_USERNAME
+# =============================================================================
+
+[webservers]
+# Example (uncomment and modify):
+# production-server ansible_host=192.168.1.100 ansible_user=ubuntu
+# production-server-2 ansible_host=192.168.1.101 ansible_user=ubuntu
+
+# Add your servers below:
+
+
+[webservers:vars]
+ansible_python_interpreter=/usr/bin/python3

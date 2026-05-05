@@ -1,0 +1,19 @@
+# Common variables for all hosts
+
+# Project settings
+project_name: diary
+# Use SSH URL for private repositories (requires SSH key on server)
+# For public repos, you can use: https://github.com/pyprism/Diary.git
+project_repo: git@github.com:pyprism/Diary.git
+project_branch: master
+
+# Deployment paths (base path comes from vars/secrets.yml)
+# deployment_base_dir is defined in vars/secrets.yml (default: /opt/diary)
+project_root: "{{ deployment_base_dir }}"
+logs_dir: "{{ deployment_base_dir }}/logs"
+
+# Django settings module
+django_settings_module: "hiren.settings"
+
+# Git settings
+use_git_agent_forwarding: true  # Set to false if not using SSH agent forwarding

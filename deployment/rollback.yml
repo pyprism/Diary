@@ -1,0 +1,89 @@
+---
+# Rollback playbook - Rollback to a specific git commit/tag
+- name: Rollback Diary Application
+  hosts: webservers
+  become: yes
+  vars_files:
+    - vars/secrets.yml
+
+  vars_prompt:
+    - name: git_version
+      prompt: "Enter git commit hash or tag to rollback to"
+      private: no
+
+  tasks:
+    - name: Stop containers
+      shell: |
+        cd {{ project_root }}
+        docker compose down
+      become: yes
+      become_user: "{{ deployment_user }}"
+      tags: [always]
+
+    - name: Checkout specified version
+      git:
+        repo: "{{ project_repo }}"
+        dest: "{{ project_root }}"
+        version: "{{ git_version }}"
+        force: yes
+      become: yes
+      become_user: "{{ deployment_user }}"
+      tags: [always]
+
+    - name: Rebuild and start containers
+      shell: |
+        cd {{ project_root }}
+        docker compose up -d --build --remove-orphans
+      become: yes
+      become_user: "{{ deployment_user }}"
+      tags: [always]
+
+    - name: Wait for container to be ready
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --status running --format "{{ '{{' }}.Name{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_ready
+      retries: 10
+      delay: 5
+      until: container_ready.stdout | length > 0
+      changed_when: false
+      tags: [always]
+
+    - name: Run database migrations
+      shell: |
+        cd {{ project_root }}
+        docker compose exec -T web python manage.py migrate --noinput
+      become: yes
+      become_user: "{{ deployment_user }}"
+      tags: [always]
+
+    - name: Collect static files
+      shell: |
+        cd {{ project_root }}
+        docker compose exec -T web python manage.py collectstatic --noinput
+      become: yes
+      become_user: "{{ deployment_user }}"
+      tags: [always]
+
+    - name: Verify container is running
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --format "table {{ '{{' }}.Name{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_status
+      changed_when: false
+      tags: [always]
+
+    - name: Display rollback information
+      debug:
+        msg:
+          - "Rollback completed!"
+          - "Version: {{ git_version }}"
+          - ""
+          - "{{ container_status.stdout }}"
+          - ""
+          - "View logs: docker compose -f {{ project_root }}/docker-compose.yaml logs -f"
+      tags: [always]

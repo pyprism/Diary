@@ -1,0 +1,27 @@
+# Ansible
+*.retry
+.ansible/
+*.pyc
+__pycache__/
+
+# Secrets - NEVER commit these!
+vars/secrets.yml
+inventories/production/hosts
+
+# Local environment files
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
