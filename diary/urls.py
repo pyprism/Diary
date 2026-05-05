@@ -24,6 +24,16 @@ urlpatterns = [
         r"^v1/uploads/presign/?$", views.PresignView.as_view(), name="uploads-presign"
     ),
     re_path(
+        r"^v1/uploads/image/?$",
+        views.ImageUploadView.as_view(),
+        name="uploads-image",
+    ),
+    re_path(
+        r"^v1/uploads/read-url/?$",
+        views.ImageReadUrlView.as_view(),
+        name="uploads-read-url",
+    ),
+    re_path(
         r"^v1/share/(?P<token>[^/]+)/?$",
         views.PublicShareView.as_view(),
         name="public-share",
