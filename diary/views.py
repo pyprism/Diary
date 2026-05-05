@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework import viewsets, views, status, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -19,11 +20,14 @@ from diary.serializers import (
     DiaryListSerializer,
     DiaryAnalysisSerializer,
     PresignSerializer,
+    ImageUploadSerializer,
+    ImageReadUrlSerializer,
     ShareLinkCreateSerializer,
     ShareLinkSerializer,
     PublicShareSerializer,
 )
 from utils.enums import AnalysisStatus
+from utils.file_convert import convert_image_to_web
 from utils.s3 import get_s3_uploader
 
 logger = logging.getLogger(__name__)
@@ -85,6 +89,30 @@ class DiaryViewSet(viewsets.ModelViewSet):
         diary = serializer.save()
         if should_refresh_analysis:
             self._dispatch_analysis(diary)
+
+    def destroy(self, request, *args, **kwargs):
+        diary = self.get_object()
+        image_urls = _extract_image_urls(diary.content)
+        failed_urls = []
+        if image_urls:
+            uploader = get_s3_uploader()
+            managed_image_urls = [
+                url for url in image_urls if uploader.is_managed_url(url)
+            ]
+            failed_urls = [
+                url for url in managed_image_urls if not uploader.delete_file(url)
+            ]
+        if failed_urls:
+            return Response(
+                {
+                    "detail": "Failed to delete one or more diary images.",
+                    "failed_images": failed_urls,
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        diary.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get", "post"], url_path="analyze")
     def analyze(self, request, pk=None):
@@ -161,6 +189,25 @@ class DiaryViewSet(viewsets.ModelViewSet):
         return response
 
 
+def _extract_image_urls(content):
+    if not isinstance(content, dict):
+        return []
+
+    urls = []
+    seen = set()
+    for block in content.get("blocks", []):
+        if not isinstance(block, dict) or block.get("type") != "image":
+            continue
+        url = block.get("url")
+        if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+            continue
+        if url in seen:
+            continue
+        seen.add(url)
+        urls.append(url)
+    return urls
+
+
 class HomepageViewSet(viewsets.ViewSet):
     """
     Homepage API: returns diary entry titles from previous years.
@@ -235,6 +282,68 @@ class PresignView(views.APIView):
             )
 
         return Response(result, status=status.HTTP_200_OK)
+
+
+class ImageUploadView(views.APIView):
+    """
+    POST /api/v1/uploads/image/
+
+    Multipart body: { "image": <file> }
+    Converts the image to WebP on the backend, uploads it to R2, and returns
+    the stable private object URL for diary content.
+    """
+
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        serializer = ImageUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        filename, content = convert_image_to_web(serializer.validated_data["image"])
+        url = get_s3_uploader().upload_file(
+            content,
+            user_id=request.user.pk,
+            category="diary-images",
+            filename=filename,
+        )
+        if url is None:
+            return Response(
+                {"detail": "Failed to upload image. S3 may not be configured."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response(
+            {"file_url": url, "filename": filename, "content_type": "image/webp"},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ImageReadUrlView(views.APIView):
+    """
+    POST /api/v1/uploads/read-url/
+
+    Request body: { "url": "https://..." }
+    Returns a short-lived presigned GET URL for displaying private R2 images.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ImageReadUrlSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        url = serializer.validated_data["url"]
+        # TODO check user own the url by verifying with the uploader
+
+        signed_url = get_s3_uploader().generate_presigned_url(url, expiration=3600)
+        if signed_url is None:
+            return Response(
+                {"detail": "Unable to sign image URL."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({"url": signed_url}, status=status.HTTP_200_OK)
 
 
 class ShareLinkViewSet(viewsets.ViewSet):

@@ -1,0 +1,7 @@
+---
+
+- name: Check if deployment user exists
+  command: id {{ deployment_user }}
+  register: deployment_user_check
+  failed_when: false
+  changed_when: false

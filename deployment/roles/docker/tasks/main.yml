@@ -1,0 +1,278 @@
+---
+#  Install Docker Engine
+
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_installed
+  changed_when: false
+  failed_when: false
+
+- name: Install Docker (Debian/Ubuntu)
+  when:
+    - docker_installed.rc != 0
+    - ansible_os_family == "Debian"
+  block:
+    - name: Install Docker prerequisites
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Create keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add Docker GPG key
+      shell: |
+        curl -fsSL https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg \
+          | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      args:
+        creates: /etc/apt/keyrings/docker.gpg
+
+    - name: Add Docker repository
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+          https://download.docker.com/linux/{{ ansible_distribution | lower }} \
+          $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+
+    - name: Install Docker Engine
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+      retries: 3
+      delay: 10
+      register: docker_apt_result
+      until: docker_apt_result is success
+
+- name: Install Docker (RedHat/CentOS)
+  when:
+    - docker_installed.rc != 0
+    - ansible_os_family == "RedHat"
+  block:
+    - name: Install yum-utils
+      yum:
+        name: yum-utils
+        state: present
+
+    - name: Add Docker repository
+      command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      args:
+        creates: /etc/yum.repos.d/docker-ce.repo
+
+    - name: Install Docker Engine
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      retries: 3
+      delay: 10
+      register: docker_yum_result
+      until: docker_yum_result is success
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Add deployment user to docker group
+  user:
+    name: "{{ deployment_user }}"
+    groups: docker
+    append: yes
+
+- name: Verify Docker is working
+  command: docker info
+  register: docker_info
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "Docker installed: {{ docker_info.stdout_lines[0] | default('Docker is running') }}"
+
+#  Clone / update repository
+
+- name: Ensure base deployment directory exists
+  file:
+    path: "{{ deployment_base_dir }}"
+    state: directory
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0755'
+
+- name: Check if repository exists
+  stat:
+    path: "{{ project_root }}/.git"
+  register: git_repo
+
+- name: Detect repository type
+  set_fact:
+    is_ssh_repo: "{{ project_repo.startswith('git@') or 'ssh://' in project_repo }}"
+
+- name: Check if SSH key exists for deployment user
+  stat:
+    path: "/home/{{ deployment_user }}/.ssh/id_rsa"
+  register: deploy_ssh_key
+  when: is_ssh_repo
+
+- name: Set git SSH key file path if key exists
+  set_fact:
+    git_ssh_key_file: "/home/{{ deployment_user }}/.ssh/id_rsa"
+  when:
+    - is_ssh_repo
+    - deploy_ssh_key.stat.exists | default(false)
+
+- name: Clone repository (first deployment)
+  git:
+    repo: "{{ project_repo }}"
+    dest: "{{ project_root }}"
+    version: "{{ project_branch }}"
+    force: no
+    accept_hostkey: yes
+    key_file: "{{ git_ssh_key_file | default(omit) }}"
+  become: yes
+  become_user: "{{ deployment_user }}"
+  when: not git_repo.stat.exists
+  retries: 3
+  delay: 10
+  register: git_clone_result
+  until: git_clone_result is success
+
+- name: Pull latest changes (update deployment)
+  git:
+    repo: "{{ project_repo }}"
+    dest: "{{ project_root }}"
+    version: "{{ project_branch }}"
+    force: yes
+    update: yes
+    accept_hostkey: yes
+    key_file: "{{ git_ssh_key_file | default(omit) }}"
+  become: yes
+  become_user: "{{ deployment_user }}"
+  when: git_repo.stat.exists
+  register: git_pull_result
+  retries: 3
+  delay: 10
+  until: git_pull_result is success or git_pull_result is skipped
+
+#  Deploy .env and bring up containers
+
+- name: Deploy environment file
+  template:
+    src: env.j2
+    dest: "{{ project_root }}/.env"
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0600'
+  notify: restart diary containers
+
+- name: Ensure logs directory exists
+  file:
+    path: "{{ project_root }}/logs"
+    state: directory
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0755'
+
+- name: Build and start containers
+  shell: |
+    cd {{ project_root }}
+    docker compose up -d --build --remove-orphans
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: compose_up_result
+
+- name: Display compose output
+  debug:
+    msg: "{{ compose_up_result.stdout_lines | default([]) }}"
+
+- name: Wait for container to be healthy
+  shell: |
+    cd {{ project_root }}
+    status=$(docker compose ps --format json | python3 -c "
+    import sys, json
+    data = sys.stdin.read().strip()
+    # docker compose v2 may output one JSON object per line or a JSON array
+    entries = []
+    for line in data.splitlines():
+        line = line.strip()
+        if line:
+            parsed = json.loads(line)
+            if isinstance(parsed, list):
+                entries.extend(parsed)
+            else:
+                entries.append(parsed)
+    for svc in entries:
+        health = svc.get('Health', svc.get('health', ''))
+        state = svc.get('State', svc.get('state', ''))
+        if health:
+            print(health)
+        else:
+            print(state)
+    ")
+    echo "$status"
+    echo "$status" | grep -qi "healthy"
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: compose_health
+  retries: 12
+  delay: 10
+  until: compose_health.rc == 0
+  changed_when: false
+
+- name: Display container health status
+  debug:
+    msg: "Container health: {{ compose_health.stdout }}"
+
+- name: Run database migrations
+  shell: |
+    cd {{ project_root }}
+    docker compose exec -T web python manage.py migrate --noinput
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: migrate_result
+
+- name: Display migration output
+  debug:
+    msg: "{{ migrate_result.stdout_lines | default([]) }}"
+
+- name: Collect static files
+  shell: |
+    cd {{ project_root }}
+    docker compose exec -T web python manage.py collectstatic --noinput
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: collectstatic_result
+  changed_when: "'Copying' in collectstatic_result.stdout or 'Post-processed' in collectstatic_result.stdout"
+
+- name: Verify container is running
+  shell: |
+    cd {{ project_root }}
+    docker compose ps --status running --format "{{ '{{' }}.Name{{ '}}' }}: {{ '{{' }}.Status{{ '}}' }}"
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: container_status
+  changed_when: false
+
+- name: Display container status
+  debug:
+    msg: "{{ container_status.stdout_lines | default(['No containers running']) }}"

@@ -51,5 +51,5 @@ fi
 # BEAT_PID=$!
 
 "$PYTHON_BIN" manage.py runserver
-#pytest -vv -s
+#"$PYTHON_BIN" -m pytest -vv -s
 #pytest --cov=. --cov-report=html

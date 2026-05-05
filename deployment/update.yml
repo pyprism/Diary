@@ -1,0 +1,116 @@
+---
+# Lightweight playbook for updating existing Docker deployment
+# Usage: ansible-playbook -i inventories/production update.yml
+- name: Update Diary Application
+  hosts: webservers
+  become: yes
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    # Step 1: Pull latest code from git
+    - name: Pull latest code from git
+      git:
+        repo: "{{ project_repo }}"
+        dest: "{{ project_root }}"
+        version: "{{ project_branch }}"
+        accept_hostkey: yes
+        force: yes
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: git_result
+      tags: [git, update]
+
+    - name: Display git update result
+      debug:
+        msg: "Git updated: {{ git_result.changed }} - {{ git_result.after[:8] if git_result.after is defined else 'N/A' }}"
+      tags: [git, update]
+
+    # Step 2: Update .env file
+    - name: Update environment file
+      template:
+        src: roles/docker/templates/env.j2
+        dest: "{{ project_root }}/.env"
+        owner: "{{ deployment_user }}"
+        group: "{{ deployment_user }}"
+        mode: '0600'
+      tags: [config, update]
+
+    # Step 3: Rebuild and restart containers
+    - name: Rebuild and restart containers
+      shell: |
+        cd {{ project_root }}
+        docker compose up -d --build --remove-orphans
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: compose_result
+      tags: [docker, update]
+
+    - name: Display compose output
+      debug:
+        msg: "{{ compose_result.stdout_lines | default([]) }}"
+      tags: [docker, update]
+
+    # Step 4: Wait for container to be ready
+    - name: Wait for container to be ready
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --status running --format "{{ '{{' }}.Name{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_ready
+      retries: 10
+      delay: 5
+      until: container_ready.stdout | length > 0
+      changed_when: false
+      tags: [docker, update]
+
+    # Step 5: Run Django migrations
+    - name: Run Django migrations
+      shell: |
+        cd {{ project_root }}
+        docker compose exec -T web python manage.py migrate --noinput
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: migrate_result
+      tags: [migrate, update]
+
+    - name: Display migration output
+      debug:
+        msg: "{{ migrate_result.stdout_lines | default([]) }}"
+      tags: [migrate, update]
+
+    # Step 6: Collect static files
+    - name: Collect static files
+      shell: |
+        cd {{ project_root }}
+        docker compose exec -T web python manage.py collectstatic --noinput
+      become: yes
+      become_user: "{{ deployment_user }}"
+      when: git_result.changed
+      tags: [static, update]
+
+    # Step 7: Verify container status
+    - name: Verify container is running
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --format "table {{ '{{' }}.Name{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_status
+      changed_when: false
+      tags: [always]
+
+    - name: Display update summary
+      debug:
+        msg:
+          - "========================================"
+          - "Update completed successfully!"
+          - "========================================"
+          - "Git changed: {{ git_result.changed }}"
+          - "Commit: {{ git_result.after[:8] if git_result.after is defined else 'N/A' }}"
+          - ""
+          - "{{ container_status.stdout }}"
+          - "========================================"
+          - "View logs: docker compose -f {{ project_root }}/docker-compose.yaml logs -f"
+      tags: [always]

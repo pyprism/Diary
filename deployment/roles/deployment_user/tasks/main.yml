@@ -1,0 +1,163 @@
+---
+- name: Check if deployment user already exists
+  command: id {{ deployment_user }}
+  register: user_exists_check
+  changed_when: false
+  failed_when: false
+
+- name: Display existing user status
+  debug:
+    msg: "Deployment user {{ deployment_user }} already exists, skipping creation"
+  when: user_exists_check.rc == 0
+
+- name: Create deployment user
+  user:
+    name: "{{ deployment_user }}"
+    shell: /bin/bash
+    create_home: yes
+    home: "/home/{{ deployment_user }}"
+    state: present
+  register: user_creation_result
+  when: user_exists_check.rc != 0
+
+- name: Display deployment user creation status
+  debug:
+    msg: "Deployment user {{ deployment_user }} created successfully"
+  when: user_exists_check.rc != 0
+
+- name: Wait for user creation to complete
+  pause:
+    seconds: 1
+  when: user_exists_check.rc != 0 and (user_creation_result.changed | default(false))
+
+- name: Verify deployment user exists
+  command: id {{ deployment_user }}
+  register: verify_user
+  changed_when: false
+  retries: 3
+  delay: 2
+  until: verify_user.rc == 0
+
+- name: Ensure sudoers.d directory exists
+  file:
+    path: /etc/sudoers.d
+    state: directory
+    mode: '0750'
+
+- name: Add deployment user to sudoers for Docker management
+  copy:
+    content: "{{ deployment_user }} ALL=(ALL) NOPASSWD: /usr/bin/docker, /bin/systemctl start docker, /bin/systemctl stop docker, /bin/systemctl restart docker, /bin/systemctl status docker\n"
+    dest: /etc/sudoers.d/{{ deployment_user }}
+    mode: '0440'
+    owner: root
+    group: root
+    validate: 'visudo -cf %s'
+  register: sudoers_result
+
+- name: Display sudoers configuration status
+  debug:
+    msg: "Sudoers configuration completed for {{ deployment_user }}"
+
+- name: Get parent directory of deployment base
+  set_fact:
+    deployment_parent_dir: "{{ deployment_base_dir | dirname }}"
+  when: deployment_base_dir is defined
+
+- name: Ensure parent directories exist (as root)
+  file:
+    path: "{{ deployment_parent_dir }}"
+    state: directory
+    mode: '0755'
+  when:
+    - deployment_base_dir is defined
+    - deployment_parent_dir != '/'
+    - deployment_parent_dir != ''
+
+- name: Ensure base deployment directory exists with correct ownership
+  file:
+    path: "{{ deployment_base_dir }}"
+    state: directory
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0755'
+    recurse: no
+  when: deployment_base_dir is defined
+
+- name: Display ownership change status
+  debug:
+    msg: "Base directory ownership set for {{ deployment_user }}"
+
+- name: Create SSH directory for deployment user
+  file:
+    path: "/home/{{ deployment_user }}/.ssh"
+    state: directory
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0700'
+
+- name: Copy SSH private key for git access (if provided)
+  copy:
+    content: "{{ git_ssh_private_key }}"
+    dest: "/home/{{ deployment_user }}/.ssh/id_rsa"
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0600'
+  when: git_ssh_private_key is defined and git_ssh_private_key | length > 0
+  no_log: true
+  register: ssh_key_copy_result
+
+- name: Verify SSH key was copied correctly
+  stat:
+    path: "/home/{{ deployment_user }}/.ssh/id_rsa"
+  register: ssh_key_stat
+  when: git_ssh_private_key is defined and git_ssh_private_key | length > 0
+
+- name: Display SSH key deployment status
+  debug:
+    msg: "SSH private key deployed: {{ ssh_key_stat.stat.exists | default(false) }}, size: {{ ssh_key_stat.stat.size | default(0) }} bytes"
+  when: git_ssh_private_key is defined and git_ssh_private_key | length > 0
+
+- name: Copy SSH public key for git access (if provided)
+  copy:
+    content: "{{ git_ssh_public_key }}"
+    dest: "/home/{{ deployment_user }}/.ssh/id_rsa.pub"
+    owner: "{{ deployment_user }}"
+    group: "{{ deployment_user }}"
+    mode: '0644'
+  when: git_ssh_public_key is defined and git_ssh_public_key | length > 0
+  no_log: true
+
+- name: Add GitHub to known hosts
+  known_hosts:
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com 2>/dev/null') }}"
+    path: "/home/{{ deployment_user }}/.ssh/known_hosts"
+    state: present
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: known_hosts_result
+
+- name: Add GitHub to known hosts (fallback - direct method)
+  shell: |
+    ssh-keyscan -t rsa,ed25519 github.com >> /home/{{ deployment_user }}/.ssh/known_hosts 2>/dev/null
+    chown {{ deployment_user }}:{{ deployment_user }} /home/{{ deployment_user }}/.ssh/known_hosts
+    chmod 600 /home/{{ deployment_user }}/.ssh/known_hosts
+  when: known_hosts_result is failed
+
+- name: Test GitHub SSH connectivity (if key deployed)
+  shell: |
+    ssh -i /home/{{ deployment_user }}/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -T git@github.com 2>&1 || true
+  become: yes
+  become_user: "{{ deployment_user }}"
+  register: github_test
+  changed_when: false
+  when: git_ssh_private_key is defined and git_ssh_private_key | length > 0
+
+- name: Display GitHub connectivity result
+  debug:
+    msg: |
+      GitHub SSH Test Result:
+      {{ github_test.stdout | default('No output') }}
+      {{ github_test.stderr | default('') }}
+      Authentication successful: {{ 'successfully authenticated' in (github_test.stdout | default('')) }}
+  when: github_test is defined

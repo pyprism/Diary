@@ -4,6 +4,7 @@ import mimetypes
 import os
 import uuid
 from io import BytesIO
+from urllib.parse import urlparse
 
 import boto3
 from botocore.exceptions import ClientError
@@ -28,15 +29,48 @@ class S3ImageUploader:
             config=config,
         )
         self.bucket_name = getattr(settings, "AWS_STORAGE_BUCKET_NAME", None)
-        self.base_url = getattr(
-            settings,
-            "AWS_S3_CUSTOM_DOMAIN",
-            (
-                f"https://{self.bucket_name}.s3.amazonaws.com"
-                if self.bucket_name
-                else None
-            ),
+        custom_domain = getattr(settings, "AWS_S3_CUSTOM_DOMAIN", None)
+        fallback_url = (
+            f"https://{self.bucket_name}.s3.amazonaws.com" if self.bucket_name else None
         )
+        self.base_url = self._normalize_base_url(custom_domain or fallback_url)
+
+    def _normalize_base_url(self, url):
+        if not url:
+            return None
+        url = url.strip().rstrip("/")
+        if not url:
+            return None
+        if not url.startswith(("http://", "https://")):
+            return f"https://{url}"
+        return url
+
+    def _extract_file_key(self, url):
+        if not self.base_url:
+            return None
+
+        normalized_url = self._normalize_base_url(url)
+        if not normalized_url:
+            return None
+
+        parsed_url = urlparse(normalized_url)
+        parsed_base = urlparse(self.base_url)
+        if parsed_url.hostname in {"localhost", "127.0.0.1"}:
+            path_segments = parsed_url.path.lstrip("/").split("/", 1)
+            if path_segments and path_segments[0] == parsed_base.netloc:
+                return path_segments[1] if len(path_segments) > 1 else None
+
+        if (
+            parsed_url.scheme != parsed_base.scheme
+            or parsed_url.netloc != parsed_base.netloc
+        ):
+            return None
+
+        key = parsed_url.path.lstrip("/")
+        return key or None
+
+    def is_managed_url(self, url):
+        return self._extract_file_key(url) is not None
 
     def _generate_file_key(self, user_id, category, filename):
         """Generate a unique file key for S3."""
@@ -116,10 +150,8 @@ class S3ImageUploader:
             return False
 
         try:
-            # Extract key from URL
-            if url.startswith(self.base_url):
-                file_key = url[len(self.base_url) + 1 :]
-            else:
+            file_key = self._extract_file_key(url)
+            if file_key is None:
                 logger.error(f"URL does not match expected base: {url}")
                 return False
 
@@ -186,9 +218,8 @@ class S3ImageUploader:
             return None
 
         try:
-            if url.startswith(self.base_url):
-                file_key = url[len(self.base_url) + 1 :]
-            else:
+            file_key = self._extract_file_key(url)
+            if file_key is None:
                 return None
 
             presigned_url = self.s3_client.generate_presigned_url(

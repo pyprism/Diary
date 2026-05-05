@@ -6,6 +6,7 @@ from rest_framework import serializers
 from base.models import User
 from diary.models import Tag, Diary, ShareLink, DiaryAnalysis
 from utils.enums import AnalysisStatus, ShareType
+from utils.s3 import get_s3_uploader
 
 ALLOWED_BLOCK_TYPES = {
     "heading",
@@ -297,6 +298,21 @@ class PresignSerializer(serializers.Serializer):
         return value
 
 
+class ImageUploadSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+
+
+class ImageReadUrlSerializer(serializers.Serializer):
+    url = serializers.CharField()
+
+    def validate_url(self, value):
+        if not isinstance(value, str) or not value.strip():
+            raise serializers.ValidationError("Image URL is required.")
+        if get_s3_uploader().generate_presigned_url(value, expiration=60) is None:
+            raise serializers.ValidationError("Image URL is not managed by this app.")
+        return value
+
+
 class ShareLinkCreateSerializer(serializers.Serializer):
     """Input serializer for creating a share link."""
 
@@ -378,7 +394,7 @@ class PublicShareSerializer(serializers.ModelSerializer):
     def get_content(self, obj):
         if obj.share_type == "EXCERPT":
             return obj.excerpt
-        return obj.diary.content
+        return sign_image_urls(obj.diary.content)
 
 
 class DiaryAnalysisSerializer(serializers.ModelSerializer):
@@ -405,3 +421,30 @@ class DiaryAnalysisSerializer(serializers.ModelSerializer):
         if obj.status in (AnalysisStatus.PENDING, AnalysisStatus.PROCESSING):
             return 10
         return None
+
+
+def sign_image_urls(content, expiration=3600):
+    if not isinstance(content, dict):
+        return content
+
+    signed_content = {
+        **content,
+        "blocks": [],
+    }
+    uploader = get_s3_uploader()
+
+    for block in content.get("blocks", []):
+        if not isinstance(block, dict):
+            signed_content["blocks"].append(block)
+            continue
+
+        next_block = {**block}
+        if next_block.get("type") == "image":
+            url = next_block.get("url")
+            if isinstance(url, str) and url.startswith(("http://", "https://")):
+                signed_url = uploader.generate_presigned_url(url, expiration=expiration)
+                if signed_url:
+                    next_block["url"] = signed_url
+        signed_content["blocks"].append(next_block)
+
+    return signed_content

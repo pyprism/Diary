@@ -1,0 +1,78 @@
+---
+# Minimal test playbook to verify Docker deployment prerequisites
+- name: Test Deployment Steps
+  hosts: webservers
+  become: yes
+  vars_files:
+    - vars/secrets.yml
+
+  tasks:
+    - name: Test 1 - Basic connectivity
+      debug:
+        msg: "Connection successful"
+      tags: [test1]
+
+    - name: Test 2 - Check deployment_user variable
+      debug:
+        msg: "Deployment user is: {{ deployment_user }}"
+      tags: [test2]
+
+    - name: Test 3 - Create deployment user
+      user:
+        name: "{{ deployment_user }}"
+        shell: /bin/bash
+        create_home: yes
+        home: "/home/{{ deployment_user }}"
+        groups: docker
+        append: yes
+        state: present
+      tags: [test3]
+
+    - name: Test 4 - Create base directory
+      file:
+        path: "{{ deployment_base_dir }}"
+        state: directory
+        mode: '0755'
+      tags: [test4]
+
+    - name: Test 5 - Set directory ownership
+      file:
+        path: "{{ deployment_base_dir }}"
+        state: directory
+        owner: "{{ deployment_user }}"
+        group: "{{ deployment_user }}"
+        mode: '0755'
+      tags: [test5]
+
+    - name: Test 6 - Check Docker installation
+      command: docker --version
+      register: docker_check
+      changed_when: false
+      tags: [test6]
+
+    - name: Test 7 - Display Docker status
+      debug:
+        msg: "Docker: {{ docker_check.stdout | default('NOT INSTALLED') }}"
+      tags: [test7]
+
+    - name: Test 8 - Check Docker Compose
+      command: docker compose version
+      register: compose_check
+      changed_when: false
+      tags: [test8]
+
+    - name: Test 9 - Display Docker Compose status
+      debug:
+        msg: "Docker Compose: {{ compose_check.stdout | default('NOT INSTALLED') }}"
+      tags: [test9]
+
+    - name: Test 10 - Verify Docker service is running
+      systemd:
+        name: docker
+      register: docker_service
+      tags: [test10]
+
+    - name: Test 11 - Display Docker service status
+      debug:
+        msg: "Docker service: {{ docker_service.status.ActiveState | default('NOT RUNNING') }}"
+      tags: [test11]

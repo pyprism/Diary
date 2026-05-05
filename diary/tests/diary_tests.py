@@ -1,7 +1,11 @@
 import datetime
+from io import BytesIO
+from unittest.mock import Mock, patch
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
+from PIL import Image
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework.reverse import reverse
@@ -18,6 +22,14 @@ VALID_CONTENT = {
         {"type": "paragraph", "text": "Good day."},
     ],
 }
+
+
+def _entries_from_list_response(payload):
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        return payload.get("results", [])
+    return []
 
 
 @pytest.fixture
@@ -109,6 +121,103 @@ def test_diary_delete(authenticated_client):
     )
     response = client.delete(reverse("diaries-detail", kwargs={"pk": diary.pk}))
     assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+def test_diary_delete_removes_associated_images(authenticated_client):
+    client, user = authenticated_client()
+    image_url = "https://example.r2.cloudflarestorage.com/users/1/photo.jpg"
+    duplicate_image_url = f"{image_url}?X-Amz-Signature=old"
+    diary = Diary.objects.create(
+        title="Test Diary",
+        content={
+            "version": 1,
+            "blocks": [
+                {"type": "paragraph", "text": "With image."},
+                {"type": "image", "url": image_url},
+                {"type": "image", "url": duplicate_image_url},
+                {"type": "image", "url": "https://cdn.example.com/external.jpg"},
+                {"type": "image", "url": "data:image/png;base64,abc"},
+            ],
+        },
+        user=user,
+        date=datetime.date(2024, 1, 1),
+    )
+    uploader = Mock()
+    uploader.delete_file.return_value = True
+    uploader.is_managed_url.side_effect = lambda url: (
+        "example.r2.cloudflarestorage.com" in url
+    )
+
+    with patch("diary.views.get_s3_uploader", return_value=uploader):
+        response = client.delete(reverse("diaries-detail", kwargs={"pk": diary.pk}))
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    assert uploader.delete_file.call_count == 2
+    uploader.delete_file.assert_any_call(image_url)
+    uploader.delete_file.assert_any_call(duplicate_image_url)
+    assert not Diary.objects.filter(pk=diary.pk).exists()
+
+
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+def test_diary_delete_keeps_entry_when_image_delete_fails(authenticated_client):
+    client, user = authenticated_client()
+    image_url = "https://example.r2.cloudflarestorage.com/users/1/photo.jpg"
+    diary = Diary.objects.create(
+        title="Test Diary",
+        content={
+            "version": 1,
+            "blocks": [{"type": "image", "url": image_url}],
+        },
+        user=user,
+        date=datetime.date(2024, 1, 1),
+    )
+    uploader = Mock()
+    uploader.delete_file.return_value = False
+    uploader.is_managed_url.return_value = True
+
+    with patch("diary.views.get_s3_uploader", return_value=uploader):
+        response = client.delete(reverse("diaries-detail", kwargs={"pk": diary.pk}))
+
+    assert response.status_code == status.HTTP_502_BAD_GATEWAY
+    assert Diary.objects.filter(pk=diary.pk).exists()
+
+
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+def test_image_upload_converts_to_webp_and_uploads(authenticated_client):
+    client, user = authenticated_client()
+    buffer = BytesIO()
+    Image.new("RGB", (1, 1), "white").save(buffer, format="PNG")
+    image_bytes = buffer.getvalue()
+    upload = SimpleUploadedFile("photo.png", image_bytes, content_type="image/png")
+    uploader = Mock()
+    uploader.upload_file.return_value = "https://example.r2/photo.webp"
+
+    with (
+        patch("diary.views.get_s3_uploader", return_value=uploader),
+        patch(
+            "diary.views.convert_image_to_web",
+            return_value=("photo.webp", b"webp-bytes"),
+        ),
+    ):
+        response = client.post(
+            reverse("uploads-image"),
+            {"image": upload},
+            format="multipart",
+        )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data == {
+        "file_url": "https://example.r2/photo.webp",
+        "filename": "photo.webp",
+        "content_type": "image/webp",
+    }
+    uploader.upload_file.assert_called_once_with(
+        b"webp-bytes",
+        user_id=user.pk,
+        category="diary-images",
+        filename="photo.webp",
+    )
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
@@ -251,7 +360,7 @@ def test_diary_list_search_across_diary_and_analysis_fields(
     response = client.get(reverse("diaries-list"), {"search": query})
     assert response.status_code == status.HTTP_200_OK
 
-    result_ids = {entry["id"] for entry in response.data}
+    result_ids = {entry["id"] for entry in _entries_from_list_response(response.data)}
     assert matching.id in result_ids
     assert non_matching.id not in result_ids
 
@@ -274,4 +383,6 @@ def test_diary_list_search_matches_diary_id(authenticated_client):
 
     response = client.get(reverse("diaries-list"), {"search": str(matching.id)})
     assert response.status_code == status.HTTP_200_OK
-    assert [entry["id"] for entry in response.data] == [matching.id]
+    assert [entry["id"] for entry in _entries_from_list_response(response.data)] == [
+        matching.id
+    ]

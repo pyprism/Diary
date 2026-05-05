@@ -1,0 +1,133 @@
+---
+# Health check playbook - Verify Docker deployment health
+- name: Health Check for Diary Application
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Check if Docker is running
+      systemd:
+        name: docker
+      register: docker_status
+
+    - name: Verify Docker is active
+      assert:
+        that:
+          - docker_status.status.ActiveState == "active"
+        fail_msg: "Docker service is not active!"
+        success_msg: "Docker service is running"
+
+    - name: Check container status
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --format json
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_status
+      changed_when: false
+
+    - name: Check container is running
+      shell: |
+        cd {{ project_root }}
+        docker compose ps --status running --format "{{ '{{' }}.Name{{ '}}' }}"
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: running_containers
+      changed_when: false
+
+    - name: Verify container is running
+      assert:
+        that:
+          - running_containers.stdout | length > 0
+        fail_msg: "No containers are running!"
+        success_msg: "Container is running"
+
+    - name: Check application directory
+      stat:
+        path: "{{ project_root }}"
+      register: app_dir
+
+    - name: Verify application is deployed
+      assert:
+        that:
+          - app_dir.stat.exists
+          - app_dir.stat.isdir
+        fail_msg: "Application directory not found!"
+        success_msg: "Application directory exists"
+
+    - name: Get current git version
+      command: git rev-parse --short HEAD
+      args:
+        chdir: "{{ project_root }}"
+      register: git_version
+      changed_when: false
+      become_user: "{{ deployment_user }}"
+
+    - name: Get Docker version
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Get container image info
+      shell: |
+        cd {{ project_root }}
+        docker compose images
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: image_info
+      changed_when: false
+
+    - name: Check database connectivity
+      shell: |
+        cd {{ project_root }}
+        docker compose exec -T web python manage.py check --database default
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: db_check
+      changed_when: false
+
+    - name: Get container logs (last 10 lines)
+      shell: |
+        cd {{ project_root }}
+        docker compose logs --tail=10 --no-color
+      become: yes
+      become_user: "{{ deployment_user }}"
+      register: container_logs
+      changed_when: false
+
+    - name: Get disk usage
+      shell: df -h {{ deployment_base_dir }} | tail -1 | awk '{print $5}'
+      register: disk_usage
+      changed_when: false
+
+    - name: Get memory usage
+      shell: free -h | grep Mem | awk '{print $3 "/" $2}'
+      register: memory_usage
+      changed_when: false
+
+    - name: Get Docker disk usage
+      shell: docker system df --format "table {{ '{{' }}.Type{{ '}}' }}\t{{ '{{' }}.TotalCount{{ '}}' }}\t{{ '{{' }}.Size{{ '}}' }}\t{{ '{{' }}.Reclaimable{{ '}}' }}"
+      register: docker_disk
+      changed_when: false
+
+    - name: Display health summary
+      debug:
+        msg:
+          - "========================================="
+          - "Health Check Summary"
+          - "========================================="
+          - "Docker: {{ docker_status.status.ActiveState }}"
+          - "Docker Version: {{ docker_version.stdout }}"
+          - "Git Version: {{ git_version.stdout }}"
+          - "Database: {{ 'OK' if db_check.rc == 0 else 'ERROR' }}"
+          - "Disk Usage: {{ disk_usage.stdout }}"
+          - "Memory Usage: {{ memory_usage.stdout }}"
+          - "========================================="
+          - "Container Status:"
+          - "{{ running_containers.stdout }}"
+          - "========================================="
+
+    - name: Fail if database check failed
+      fail:
+        msg: "Database connectivity check failed!"
+      when: db_check.rc != 0
