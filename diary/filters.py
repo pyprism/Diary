@@ -50,12 +50,13 @@ class DiaryFilter(django_filters.FilterSet):
         )
 
         for token in tokens:
+            if token.isdigit():
+                queryset = queryset.filter(id=int(token))
+                continue
+
             token_filter = Q()
             for field in searchable_fields:
                 token_filter |= Q(**{field: token})
-
-            if token.isdigit():
-                token_filter |= Q(id=int(token))
 
             parsed_date = self._parse_search_date(token)
             if parsed_date is not None:
