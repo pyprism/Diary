@@ -18,8 +18,6 @@ services:
       rabbitmq_url: ${rabbitmq_url}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - host
     volumes:
       - logs:/app/logs
     deploy:
@@ -52,8 +50,6 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - host
 
     #  volumes
     volumes:
@@ -79,7 +75,3 @@ services:
 volumes:
   logs:
   static:
-
-networks:
-  host:
-    external: true
