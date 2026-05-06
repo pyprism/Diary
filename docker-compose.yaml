@@ -53,7 +53,7 @@ services:
 
     #  volumes
     volumes:
-      - static_files:/app/staticfiles
+      - static:/app/staticfiles
       - logs:/app/logs
 
     # health check
@@ -74,4 +74,4 @@ services:
 
 volumes:
   logs:
-  static_files:
+  static:
