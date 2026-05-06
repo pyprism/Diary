@@ -48,6 +48,7 @@ COPY --chown=diary:diary . .
 # Ensure the logs directory exists and is writable by the runtime user
 RUN mkdir -p /app/logs && chown diary:diary /app/logs
 
+RUN mkdir -p /app/staticfiles && chown diary:diary /app/staticfiles
 
 USER diary
 
