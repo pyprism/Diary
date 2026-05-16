@@ -27,6 +27,30 @@ services:
         reservations:
           memory: 128M
 
+  celery_beat:
+    build:
+      context: .
+      target: production
+    container_name: diary_celery_beat
+    restart: unless-stopped
+    command: >
+      celery -A hiren beat
+        --loglevel=info
+    env_file: .env
+    environment:
+      db_host: host.docker.internal
+      rabbitmq_url: ${rabbitmq_url}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
+
   web:
     build:
       context: .
