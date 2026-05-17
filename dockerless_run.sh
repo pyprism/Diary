@@ -46,9 +46,10 @@ if [[ "${RUN_CELERY_WORKER:-true}" == "true" ]]; then
   CELERY_PID=$!
 fi
 
-# Optional: start celery beat (uncomment to enable)
-# python -m celery -A hiren beat --loglevel=info &
-# BEAT_PID=$!
+if [[ "${RUN_CELERY_BEAT:-true}" == "true" ]]; then
+  "$PYTHON_BIN" -m celery -A hiren beat --loglevel=info &
+  BEAT_PID=$!
+fi
 
 "$PYTHON_BIN" manage.py runserver
 #"$PYTHON_BIN" -m pytest -vv -s
