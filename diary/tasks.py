@@ -88,6 +88,13 @@ def enqueue_analysis_task(diary):
     from diary.models import DiaryAnalysis
 
     analysis, _ = DiaryAnalysis.objects.get_or_create_for_diary(diary)
+    previous_status = analysis.status
+    previous_error = analysis.error
+    previous_task_id = analysis.task_id
+    should_preserve_retryable_failure = (
+        previous_status == AnalysisStatus.FAILED
+        and _is_retryable_failure(previous_error)
+    )
     task_id = uuid.uuid4().hex
     analysis.status = AnalysisStatus.PENDING
     analysis.error = ""
@@ -99,8 +106,13 @@ def enqueue_analysis_task(diary):
     except (CeleryError, OSError) as exc:
         logger.exception("Failed to dispatch analysis task for diary %s", diary.pk)
         analysis.status = AnalysisStatus.FAILED
-        analysis.error = f"Failed to dispatch analysis task: {exc}"
-        analysis.save(update_fields=["status", "error", "updated_at"])
+        if should_preserve_retryable_failure:
+            analysis.error = previous_error
+            analysis.task_id = previous_task_id
+            analysis.save(update_fields=["status", "error", "task_id", "updated_at"])
+        else:
+            analysis.error = f"Failed to dispatch analysis task: {exc}"
+            analysis.save(update_fields=["status", "error", "updated_at"])
 
     return analysis
 
