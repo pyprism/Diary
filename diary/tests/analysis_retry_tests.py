@@ -5,7 +5,11 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from diary.models import Diary, DiaryAnalysis
-from diary.tasks import _is_retryable_failure, retry_failed_diary_analyses_task
+from diary.tasks import (
+    _is_retryable_failure,
+    enqueue_analysis_task,
+    retry_failed_diary_analyses_task,
+)
 from utils.enums import AnalysisStatus
 
 
@@ -92,7 +96,48 @@ def test_retry_failed_diary_analyses_task_keeps_failed_status_when_enqueue_fails
 
     assert retried == 0
     assert analysis.status == AnalysisStatus.FAILED
-    assert analysis.error == "Failed to dispatch analysis task: broker unavailable"
+    assert analysis.error == "OpenRouter HTTP 429: rate limited"
+    assert analysis.task_id == "old-task-id"
+
+
+def test_enqueue_analysis_task_preserves_retryable_error_when_dispatch_fails(
+    monkeypatch,
+):
+    class FakeAnalysis:
+        status = AnalysisStatus.FAILED
+        error = "OpenRouter HTTP 429: rate limited"
+        task_id = "old-task-id"
+
+        def __init__(self):
+            self.save_calls = []
+
+        def save(self, update_fields):
+            self.save_calls.append(update_fields)
+
+    class FakeDiary:
+        pk = 1
+
+    analysis = FakeAnalysis()
+    monkeypatch.setattr(
+        DiaryAnalysis.objects,
+        "get_or_create_for_diary",
+        lambda diary: (analysis, False),
+    )
+
+    with patch(
+        "diary.tasks.analyze_diary_task.apply_async",
+        side_effect=OSError("broker unavailable"),
+    ):
+        result = enqueue_analysis_task(FakeDiary())
+
+    assert result is analysis
+    assert analysis.status == AnalysisStatus.FAILED
+    assert analysis.error == "OpenRouter HTTP 429: rate limited"
+    assert analysis.task_id == "old-task-id"
+    assert analysis.save_calls == [
+        ["status", "error", "task_id", "updated_at"],
+        ["status", "error", "task_id", "updated_at"],
+    ]
 
 
 @pytest.mark.parametrize(
