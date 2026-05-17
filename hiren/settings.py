@@ -367,6 +367,12 @@ CELERY_RESULT_EXPIRES = timedelta(days=7)
 # Timezone (inherit from Django)
 CELERY_TIMEZONE = os.environ.get("time_zone", "UTC")
 CELERY_ENABLE_UTC = True
+CELERY_BEAT_SCHEDULE = {
+    "retry-failed-diary-analyses-hourly": {
+        "task": "diary.tasks.retry_failed_diary_analyses_task",
+        "schedule": timedelta(hours=1),
+    }
+}
 
 # OpenRouter / LLM
 OPENROUTER_API_KEY = os.environ.get("openrouter_api_key", "")

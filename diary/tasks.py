@@ -11,17 +11,37 @@ analyze_diary_task
 
 import json
 import logging
+import uuid
 
 import requests
 from celery import shared_task
-from celery.exceptions import Retry, SoftTimeLimitExceeded
+from celery.exceptions import CeleryError, Retry, SoftTimeLimitExceeded
 from django.conf import settings
 from rest_framework import serializers
 
-from utils.enums import Mood
+from utils.enums import AnalysisStatus, Mood
 
 logger = logging.getLogger(__name__)
 RETRYABLE_HTTP_STATUS_CODES = {408, 409, 425, 429, 500, 502, 503, 504}
+RETRYABLE_ERROR_MARKERS = (
+    "OpenRouter HTTP 408:",
+    "OpenRouter HTTP 409:",
+    "OpenRouter HTTP 425:",
+    "OpenRouter HTTP 429:",
+    "OpenRouter HTTP 500:",
+    "OpenRouter HTTP 502:",
+    "OpenRouter HTTP 503:",
+    "OpenRouter HTTP 504:",
+    "timeout",
+    "timed out",
+    "readtimeout",
+    "connecttimeout",
+    "connectionerror",
+    "connection error",
+    "max retries exceeded",
+    "failed to establish a new connection",
+    "soft time limit exceeded",
+)
 
 # Prompt
 
@@ -57,6 +77,71 @@ Return ONLY a single valid JSON object — no markdown, no extra keys — with t
   "summary": "<Bengali summary>"
 }
 """
+
+
+def enqueue_analysis_task(diary):
+    """
+    Create/reset the analysis record and enqueue the Celery task.
+
+    Returns the DiaryAnalysis row so callers can respond immediately.
+    """
+    from diary.models import DiaryAnalysis
+
+    analysis, _ = DiaryAnalysis.objects.get_or_create_for_diary(diary)
+    previous_status = analysis.status
+    previous_error = analysis.error
+    previous_task_id = analysis.task_id
+    should_preserve_retryable_failure = (
+        previous_status == AnalysisStatus.FAILED
+        and _is_retryable_failure(previous_error)
+    )
+    task_id = uuid.uuid4().hex
+    analysis.status = AnalysisStatus.PENDING
+    analysis.error = ""
+    analysis.task_id = task_id
+    analysis.save(update_fields=["status", "error", "task_id", "updated_at"])
+
+    try:
+        analyze_diary_task.apply_async(args=[diary.pk], task_id=task_id)
+    except (CeleryError, OSError) as exc:
+        logger.exception("Failed to dispatch analysis task for diary %s", diary.pk)
+        analysis.status = AnalysisStatus.FAILED
+        if should_preserve_retryable_failure:
+            analysis.error = previous_error
+            analysis.task_id = previous_task_id
+            analysis.save(update_fields=["status", "error", "task_id", "updated_at"])
+        else:
+            analysis.error = f"Failed to dispatch analysis task: {exc}"
+            analysis.save(update_fields=["status", "error", "updated_at"])
+
+    return analysis
+
+
+@shared_task(name="diary.tasks.retry_failed_diary_analyses_task")
+def retry_failed_diary_analyses_task():
+    """
+    Requeue retryable failed analyses once per hour.
+    """
+    from diary.models import DiaryAnalysis
+
+    retried = 0
+    failed_analyses = (
+        DiaryAnalysis.objects.filter(status=AnalysisStatus.FAILED)
+        .select_related("diary")
+        .order_by("updated_at")
+    )
+
+    for analysis in failed_analyses.iterator():
+        if not _is_retryable_failure(analysis.error):
+            continue
+        refreshed_analysis = enqueue_analysis_task(analysis.diary)
+        if refreshed_analysis.status != AnalysisStatus.FAILED:
+            retried += 1
+
+    logger.info(
+        "retry_failed_diary_analyses_task: requeued %s failed analyses.", retried
+    )
+    return retried
 
 
 # Task
@@ -236,7 +321,7 @@ def _retry_or_fail(task, analysis_model, diary, exc):
     task_id = task.request.id or ""
     if task.request.retries >= task.max_retries:
         if _is_current_task(analysis_model, diary, task_id):
-            analysis_model.objects.set_failed(diary, exc)
+            analysis_model.objects.set_failed(diary, _format_retryable_error(exc))
         return
 
     if _is_current_task(analysis_model, diary, task_id):
@@ -253,3 +338,14 @@ def _is_current_task(analysis_model, diary, task_id):
     return analysis is not None and (
         not analysis.task_id or analysis.task_id == task_id
     )
+
+
+def _is_retryable_failure(error):
+    error_text = str(error).lower()
+    return any(marker.lower() in error_text for marker in RETRYABLE_ERROR_MARKERS)
+
+
+def _format_retryable_error(exc):
+    if isinstance(exc, SoftTimeLimitExceeded):
+        return "Soft time limit exceeded"
+    return f"{exc.__class__.__name__}: {exc}"

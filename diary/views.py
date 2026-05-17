@@ -1,7 +1,4 @@
 import logging
-import uuid
-
-from celery.exceptions import CeleryError
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from rest_framework import viewsets, views, status, permissions
@@ -26,6 +23,7 @@ from diary.serializers import (
     ShareLinkSerializer,
     PublicShareSerializer,
 )
+from diary.tasks import enqueue_analysis_task
 from utils.enums import AnalysisStatus
 from utils.file_convert import convert_image_to_web
 from utils.s3 import get_s3_uploader
@@ -158,25 +156,7 @@ class DiaryViewSet(viewsets.ModelViewSet):
     @staticmethod
     def _dispatch_analysis(diary):
         """Create/reset the analysis record and enqueue the Celery task."""
-        # Import task lazily to avoid circular imports
-        from diary.tasks import analyze_diary_task
-
-        # Create a PENDING record first so the client can poll immediately
-        analysis, _ = DiaryAnalysis.objects.get_or_create_for_diary(diary)
-        task_id = uuid.uuid4().hex
-        analysis.status = "PENDING"
-        analysis.error = ""
-        analysis.task_id = task_id
-        analysis.save(update_fields=["status", "error", "task_id", "updated_at"])
-
-        try:
-            analyze_diary_task.apply_async(args=[diary.pk], task_id=task_id)
-        except (CeleryError, OSError) as exc:
-            logger.exception("Failed to dispatch analysis task for diary %s", diary.pk)
-            analysis.status = "FAILED"
-            analysis.error = f"Failed to dispatch analysis task: {exc}"
-            analysis.save(update_fields=["status", "error", "updated_at"])
-        return analysis
+        return enqueue_analysis_task(diary)
 
     @staticmethod
     def _analysis_response(analysis, response_status=status.HTTP_200_OK):
