@@ -45,8 +45,8 @@ COPY --from=builder /venv /venv
 # Copy project (honours .dockerignore)
 COPY --chown=diary:diary . .
 
-# Ensure the logs directory exists and is writable by the runtime user
-RUN mkdir -p /app/logs && chown diary:diary /app/logs
+# Ensure runtime directories are writable by the non-root user.
+RUN mkdir -p /app/logs /app/run && chown diary:diary /app /app/logs /app/run
 
 RUN mkdir -p /app/staticfiles && chown diary:diary /app/staticfiles
 

@@ -36,6 +36,7 @@ services:
     command: >
       celery -A hiren beat
         --loglevel=info
+        --schedule=/app/run/celerybeat-schedule
     env_file: .env
     environment:
       db_host: host.docker.internal
