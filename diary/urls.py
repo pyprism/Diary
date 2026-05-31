@@ -17,25 +17,27 @@ urlpatterns = [
     re_path(r"^v1/diaries/(?P<diary_pk>[0-9]+)/", include(share_router.urls)),
     re_path(
         r"^v1/shares/?$",
-        views.CurrentUserShareListView.as_view(),
+        views.CurrentUserShareViewSet.as_view({"get": "list"}),
         name="current-user-shares",
     ),
     re_path(
-        r"^v1/uploads/presign/?$", views.PresignView.as_view(), name="uploads-presign"
+        r"^v1/uploads/presign/?$",
+        views.UploadViewSet.as_view({"post": "presign"}),
+        name="uploads-presign",
     ),
     re_path(
         r"^v1/uploads/image/?$",
-        views.ImageUploadView.as_view(),
+        views.UploadViewSet.as_view({"post": "image"}),
         name="uploads-image",
     ),
     re_path(
         r"^v1/uploads/read-url/?$",
-        views.ImageReadUrlView.as_view(),
+        views.UploadViewSet.as_view({"post": "read_url"}),
         name="uploads-read-url",
     ),
     re_path(
         r"^v1/share/(?P<token>[^/]+)/?$",
-        views.PublicShareView.as_view(),
+        views.PublicShareViewSet.as_view({"get": "retrieve"}),
         name="public-share",
     ),
 ]

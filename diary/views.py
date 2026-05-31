@@ -1,7 +1,7 @@
 import logging
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from rest_framework import viewsets, views, status, permissions
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -229,18 +229,26 @@ class HomepageViewSet(viewsets.ViewSet):
         )
 
 
-class PresignView(views.APIView):
+class UploadViewSet(viewsets.ViewSet):
     """
-    POST /api/v1/uploads/presign/
-
-    Request body: { "filename": "photo.jpg", "content_type": "image/jpeg" }
-    Returns a presigned S3 PUT URL for direct upload from the Flutter app.
-    After uploading, insert the returned URL into the diary content JSON.
+    Endpoints for diary image upload helpers.
     """
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def get_parsers(self):
+        if getattr(self, "action", None) == "image":
+            return [MultiPartParser(), FormParser()]
+        return super().get_parsers()
+
+    def presign(self, request):
+        """
+        POST /api/v1/uploads/presign/
+
+        Request body: { "filename": "photo.jpg", "content_type": "image/jpeg" }
+        Returns a presigned S3 PUT URL for direct upload from the Flutter app.
+        After uploading, insert the returned URL into the diary content JSON.
+        """
         serializer = PresignSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -263,20 +271,14 @@ class PresignView(views.APIView):
 
         return Response(result, status=status.HTTP_200_OK)
 
+    def image(self, request):
+        """
+        POST /api/v1/uploads/image/
 
-class ImageUploadView(views.APIView):
-    """
-    POST /api/v1/uploads/image/
-
-    Multipart body: { "image": <file> }
-    Converts the image to WebP on the backend, uploads it to R2, and returns
-    the stable private object URL for diary content.
-    """
-
-    permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
-
-    def post(self, request):
+        Multipart body: { "image": <file> }
+        Converts the image to WebP on the backend, uploads it to R2, and returns
+        the stable private object URL for diary content.
+        """
         serializer = ImageUploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -298,18 +300,13 @@ class ImageUploadView(views.APIView):
             status=status.HTTP_201_CREATED,
         )
 
+    def read_url(self, request):
+        """
+        POST /api/v1/uploads/read-url/
 
-class ImageReadUrlView(views.APIView):
-    """
-    POST /api/v1/uploads/read-url/
-
-    Request body: { "url": "https://..." }
-    Returns a short-lived presigned GET URL for displaying private R2 images.
-    """
-
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
+        Request body: { "url": "https://..." }
+        Returns a short-lived presigned GET URL for displaying private R2 images.
+        """
         serializer = ImageReadUrlSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -401,7 +398,7 @@ class ShareLinkViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CurrentUserShareListView(views.APIView):
+class CurrentUserShareViewSet(viewsets.ViewSet):
     """
     GET /api/v1/shares/
     Return every share link created by the current user.
@@ -409,7 +406,7 @@ class CurrentUserShareListView(views.APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
+    def list(self, request):
         shares = ShareLink.objects.get_all_for_user(request.user)
         serializer = ShareLinkSerializer(
             shares, many=True, context={"request": request}
@@ -417,7 +414,7 @@ class CurrentUserShareListView(views.APIView):
         return Response(serializer.data)
 
 
-class PublicShareView(views.APIView):
+class PublicShareViewSet(viewsets.ViewSet):
     """
     GET /api/v1/share/{token}/
     No authentication required.  Returns shared content if the link is still valid.
@@ -425,7 +422,7 @@ class PublicShareView(views.APIView):
 
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, token):
+    def retrieve(self, request, token=None):
         share = ShareLink.objects.get_valid(token)
         if share is None:
             return Response(
