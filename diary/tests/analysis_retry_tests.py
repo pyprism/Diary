@@ -146,6 +146,14 @@ def test_enqueue_analysis_task_preserves_retryable_error_when_dispatch_fails(
         ("OpenRouter HTTP 500: gateway failure", True),
         ("Read timed out while calling upstream", True),
         ("Connection error to upstream", True),
+        (
+            "ConnectionError: HTTPSConnectionPool(host='openrouter.ai', port=443): "
+            "Max retries exceeded with url: /api/v1/chat/completions "
+            "(Caused by NewConnectionError(\"HTTPSConnection(host='openrouter.ai', "
+            "port=443): Failed to establish a new connection: [Errno 101] "
+            'Network is unreachable"))',
+            True,
+        ),
         ("Soft time limit exceeded", True),
         ("Failed to parse LLM response: invalid json", False),
         ("OPENROUTER_API_KEY is not set.", False),

@@ -367,10 +367,13 @@ CELERY_RESULT_EXPIRES = timedelta(days=7)
 # Timezone (inherit from Django)
 CELERY_TIMEZONE = os.environ.get("time_zone", "UTC")
 CELERY_ENABLE_UTC = True
+FAILED_ANALYSIS_RETRY_INTERVAL_SECONDS = int(
+    os.environ.get("failed_analysis_retry_seconds", 3600)
+)
 CELERY_BEAT_SCHEDULE = {
     "retry-failed-diary-analyses-hourly": {
         "task": "diary.tasks.retry_failed_diary_analyses_task",
-        "schedule": timedelta(hours=1),
+        "schedule": timedelta(seconds=FAILED_ANALYSIS_RETRY_INTERVAL_SECONDS),
     }
 }
 

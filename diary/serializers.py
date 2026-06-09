@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from base.models import User
 from diary.models import Tag, Diary, ShareLink, DiaryAnalysis
+from diary.tasks import _is_retryable_failure
 from utils.enums import AnalysisStatus, ShareType
 from utils.s3 import get_s3_uploader
 
@@ -401,6 +402,7 @@ class DiaryAnalysisSerializer(serializers.ModelSerializer):
     """Read-only serializer for the analysis result of a diary entry."""
 
     retry_after_seconds = serializers.SerializerMethodField()
+    will_retry_automatically = serializers.SerializerMethodField()
 
     class Meta:
         model = DiaryAnalysis
@@ -412,6 +414,7 @@ class DiaryAnalysisSerializer(serializers.ModelSerializer):
             "task_id",
             "error",
             "retry_after_seconds",
+            "will_retry_automatically",
             "created_at",
             "updated_at",
         )
@@ -420,7 +423,16 @@ class DiaryAnalysisSerializer(serializers.ModelSerializer):
     def get_retry_after_seconds(self, obj):
         if obj.status in (AnalysisStatus.PENDING, AnalysisStatus.PROCESSING):
             return 10
+        if self.get_will_retry_automatically(obj):
+            return settings.FAILED_ANALYSIS_RETRY_INTERVAL_SECONDS
         return None
+
+    def get_will_retry_automatically(self, obj):
+        return (
+            obj.status == AnalysisStatus.FAILED
+            and bool(obj.error)
+            and _is_retryable_failure(obj.error)
+        )
 
 
 def sign_image_urls(content, expiration=3600):
