@@ -7,7 +7,7 @@ requests==2.34.2
 uWSGI==2.0.31
 pre-commit==4.6.0
 freezegun==1.5.5
-django-debug-toolbar==6.3.0
+django-debug-toolbar==7.0.0
 pytest-django==4.12.0
 markdown==3.10.2
 djangorestframework==3.17.1
