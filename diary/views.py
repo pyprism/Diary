@@ -7,6 +7,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import UserRateThrottle
 
 from diary.filters import DiaryFilter
 from diary.models import Tag, Diary, ShareLink, DiaryAnalysis
@@ -30,6 +31,17 @@ from utils.s3 import get_s3_uploader
 
 logger = logging.getLogger(__name__)
 ANALYSIS_POLL_SECONDS = 10
+
+
+class AnalyzeThrottle(UserRateThrottle):
+    """Status polling (GET) is unthrottled; triggering the LLM (POST) still is."""
+
+    scope = "analyze"
+
+    def allow_request(self, request, view):
+        if request.method == "GET":
+            return True
+        return super().allow_request(request, view)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -112,7 +124,12 @@ class DiaryViewSet(viewsets.ModelViewSet):
         diary.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["get", "post"], url_path="analyze")
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="analyze",
+        throttle_classes=[AnalyzeThrottle],
+    )
     def analyze(self, request, pk=None):
         """
         GET  /api/v1/diaries/{id}/analyze  → return current analysis status/result
@@ -307,11 +324,12 @@ class UploadViewSet(viewsets.ViewSet):
         Request body: { "url": "https://..." }
         Returns a short-lived presigned GET URL for displaying private R2 images.
         """
-        serializer = ImageReadUrlSerializer(data=request.data)
+        serializer = ImageReadUrlSerializer(
+            data=request.data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
 
         url = serializer.validated_data["url"]
-        # TODO check user own the url by verifying with the uploader
 
         signed_url = get_s3_uploader().generate_presigned_url(url, expiration=3600)
         if signed_url is None:
