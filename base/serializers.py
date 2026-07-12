@@ -26,8 +26,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "is_active", "created_at")
-        read_only_fields = fields
+        fields = ("id", "email", "is_active", "web_base_url", "created_at")
+        read_only_fields = ("id", "email", "is_active", "created_at")
+
+    def validate_web_base_url(self, value):
+        return value.rstrip("/")
