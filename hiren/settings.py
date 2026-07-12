@@ -269,6 +269,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/minute",
         "user": "40/minute",
+        "analyze": "40/minute",
     },
     "DEFAULT_PARSER_CLASSES": (
         "rest_framework.parsers.JSONParser",
@@ -374,7 +375,11 @@ CELERY_BEAT_SCHEDULE = {
     "retry-failed-diary-analyses-hourly": {
         "task": "diary.tasks.retry_failed_diary_analyses_task",
         "schedule": timedelta(seconds=FAILED_ANALYSIS_RETRY_INTERVAL_SECONDS),
-    }
+    },
+    "purge-expired-share-links-daily": {
+        "task": "diary.tasks.purge_expired_share_links_task",
+        "schedule": timedelta(days=1),
+    },
 }
 
 # OpenRouter / LLM
