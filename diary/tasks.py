@@ -144,6 +144,20 @@ def retry_failed_diary_analyses_task():
     return retried
 
 
+@shared_task(name="diary.tasks.purge_expired_share_links_task")
+def purge_expired_share_links_task():
+    """
+    Delete expired share links once per day.
+    """
+    from diary.models import ShareLink
+
+    deleted_count, _ = ShareLink.objects.delete_expired()
+    logger.info(
+        "purge_expired_share_links_task: deleted %s expired share links.", deleted_count
+    )
+    return deleted_count
+
+
 # Task
 @shared_task(
     bind=True,
