@@ -266,7 +266,7 @@ class DiarySerializer(serializers.ModelSerializer):
         diary = super().create(validated_data)
 
         for tag_name in tags_data:
-            tag, _ = Tag.objects.get_or_create(user=user, name=tag_name)
+            tag = Tag.objects.get_tag(user, tag_name)
             diary.tags.add(tag)
 
         return diary
@@ -277,10 +277,9 @@ class DiarySerializer(serializers.ModelSerializer):
 
         if tags_data is not None:
             instance.tags.clear()
+            user = self.context["request"].user
             for tag_name in tags_data:
-                tag, _ = Tag.objects.get_or_create(
-                    user=self.context["request"].user, name=tag_name
-                )
+                tag = Tag.objects.get_tag(user, tag_name)
                 instance.tags.add(tag)
 
         return instance
@@ -309,8 +308,16 @@ class ImageReadUrlSerializer(serializers.Serializer):
     def validate_url(self, value):
         if not isinstance(value, str) or not value.strip():
             raise serializers.ValidationError("Image URL is required.")
-        if get_s3_uploader().generate_presigned_url(value, expiration=60) is None:
+
+        file_key = get_s3_uploader()._extract_file_key(value)
+        if file_key is None:
             raise serializers.ValidationError("Image URL is not managed by this app.")
+
+        request = self.context.get("request")
+        owner_prefix = f"users/{request.user.pk}/"
+        if not file_key.startswith(owner_prefix):
+            raise serializers.ValidationError("You do not have access to this image.")
+
         return value
 
 
@@ -373,6 +380,13 @@ class ShareLinkSerializer(serializers.ModelSerializer):
 
     def get_public_url(self, obj):
         request = self.context.get("request")
+
+        web_base_url = (
+            request.user.web_base_url if request else obj.created_by.web_base_url
+        )
+        if web_base_url:
+            return f"{web_base_url}/share/{obj.token}"
+
         path = f"/api/v1/share/{obj.token}"
         if request:
             return request.build_absolute_uri(path)
