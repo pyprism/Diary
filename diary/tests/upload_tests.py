@@ -1,5 +1,14 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.test import APIClient
+
 from utils.s3 import S3ImageUploader
+
+User = get_user_model()
 
 
 @pytest.fixture
@@ -87,3 +96,59 @@ class TestS3ManagedUrlCheck:
         external_url = f"{TEST_DOMAINS['external_domain']}/{TEST_PATHS['file_path']}"
 
         assert not uploader.is_managed_url(external_url)
+
+
+@pytest.mark.django_db
+class TestReadUrlOwnership:
+    """Test the read-url endpoint rejects other users' image keys (IDOR)."""
+
+    def _make_client(self, email):
+        user = User.objects.create_user(email=email, password="password")
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client, user
+
+    def _mock_uploader_returning(self, file_key):
+        mock_uploader = MagicMock()
+        mock_uploader._extract_file_key.return_value = file_key
+        return mock_uploader
+
+    def test_rejects_other_users_image(self):
+        owner_client, owner = self._make_client("owner@example.com")
+        attacker_client, attacker = self._make_client("attacker@example.com")
+        assert owner.pk != attacker.pk
+
+        other_users_url = f"https://example.r2.cloudflarestorage.com/users/{owner.pk}/diary-images/photo.webp"
+
+        with patch("diary.serializers.get_s3_uploader") as mock_get_uploader:
+            mock_uploader = mock_get_uploader.return_value
+            mock_uploader._extract_file_key.return_value = (
+                f"users/{owner.pk}/diary-images/photo.webp"
+            )
+
+            response = attacker_client.post(
+                reverse("uploads-read-url"), {"url": other_users_url}, format="json"
+            )
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_allows_own_image(self):
+        owner_client, owner = self._make_client("owner2@example.com")
+        own_url = f"https://example.r2.cloudflarestorage.com/users/{owner.pk}/diary-images/photo.webp"
+
+        mock_uploader = self._mock_uploader_returning(
+            f"users/{owner.pk}/diary-images/photo.webp"
+        )
+        mock_uploader.generate_presigned_url.return_value = (
+            "https://signed.example/photo.webp"
+        )
+
+        with patch(
+            "diary.serializers.get_s3_uploader", return_value=mock_uploader
+        ), patch("diary.views.get_s3_uploader", return_value=mock_uploader):
+            response = owner_client.post(
+                reverse("uploads-read-url"), {"url": own_url}, format="json"
+            )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["url"] == "https://signed.example/photo.webp"
