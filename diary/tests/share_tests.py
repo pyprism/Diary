@@ -71,6 +71,43 @@ def test_create_full_share_link(authenticated_client, diary_entry):
 
 
 @pytest.mark.django_db
+def test_public_url_falls_back_to_api_url_without_web_base_url(
+    authenticated_client, diary_entry
+):
+    client, user = authenticated_client()
+    diary = diary_entry(user)
+
+    response = client.post(
+        f"/api/v1/diaries/{diary.pk}/shares/",
+        {"share_type": "FULL"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["public_url"].endswith(
+        f"/api/v1/share/{response.data['token']}"
+    )
+
+
+@pytest.mark.django_db
+def test_public_url_uses_users_web_base_url_when_set(authenticated_client, diary_entry):
+    client, user = authenticated_client()
+    user.web_base_url = "https://diary.example.com"
+    user.save()
+    diary = diary_entry(user)
+
+    response = client.post(
+        f"/api/v1/diaries/{diary.pk}/shares/",
+        {"share_type": "FULL"},
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    token = response.data["token"]
+    assert response.data["public_url"] == f"https://diary.example.com/share/{token}"
+
+
+@pytest.mark.django_db
 def test_create_excerpt_share_link(authenticated_client, diary_entry):
     client, user = authenticated_client()
     diary = diary_entry(user)
