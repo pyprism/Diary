@@ -1,6 +1,6 @@
 # Ansible requirements for Diary deployment
 jinja2==3.1.6
-ansible-core==2.21.1
+ansible-core==2.21.2
 ansible==14.1.0
 
 # Install with: pip install -r requirements.txt if ansible is not already installed in your local device.
