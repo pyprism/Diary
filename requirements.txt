@@ -10,7 +10,7 @@ freezegun==1.5.5
 django-debug-toolbar==7.0.0
 pytest-django==4.12.0
 markdown==3.10.2
-djangorestframework==3.17.1
+djangorestframework==3.18.0
 django-filter==26.1
 Pillow==12.3.0
 django-storages[s3]==1.14.6
